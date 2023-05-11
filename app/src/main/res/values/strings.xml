@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name" translatable="false">Quester</string>
+
+    <!-- Строки, используемые для фрагментов для навигации -->
+    <string name="character_fragment_label">Character</string>
+    <string name="list_fragment_label">Lists</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="lorem_ipsum">Lorem ipsum</string>
+
+    <!-- Строки, связанные с входом и регистрацией -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_password_confirm">Confirm password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_up">Sign up</string>
+    <string name="sign_up_complete">"Sign up complete"</string>
+    <string name="sign_up_failed">"Sign up failed"</string>
+    <string name="sign_in_complete">"Sign in complete"</string>
+    <string name="sign_in_failed">"Sign in failed"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_email">Not a valid email</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password_confirm">Passwords do not match</string>
+    <string name="username_requirements">For example, Jacob</string>
+    <string name="email_requirements">For example, jacob@gmail.com</string>
+    <string name="password_requirements">Password must be >5 characters</string>
+    <string name="password_confirm_requirements">Passwords must match</string>
+
+    <!-- Строки, связанные с нижней панелью навигации -->
+    <string name="tasks_menu_item">Tasks</string>
+    <string name="character_menu_item">Character</string>
+    <string name="settings_menu_item">Settings</string>
+    <string name="sign_up_failed_email">The email address is already in use by another account</string>
+    <string name="sign_in_failed_email">The user with this email does not exist</string>
+    <string name="sign_in_failed_password">The password is invalid</string>
+    <string name="auth_failed_network">No internet connection</string>
+    <string name="sign_up_failed_email_format">The email address is badly formatted</string>
+    <string name="get_data_error">Failed to retrieve data</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <!-- Create list alert dialog -->
+    <string name="create_list_hint">List name</string>
+    <string name="create_list_dialog_title">Enter the name of the list</string>
+    <string name="ok_dialog_button" translatable="false">OK</string>
+    <string name="cancel_dialog_button">Cancel</string>
+
+    <string name="create_list_tab">+ Create list</string>
+    <string name="create_task_dialog_title">Enter the name of the task</string>
+    <string name="create_task_hint">Task name</string>
+    <string name="appbar_menu_delete_list">Delete list</string>
+    <string name="appbar_menu_rename_list">Change name</string>
+    <string name="task_delete">Delete task</string>
+    <string name="edit_list_dialog_title">Change the name of the list</string>
+    <!-- Preference Titles -->
+
+    <!-- Messages Preferences -->
+
+    <!-- Sync Preferences -->
+    <string name="account_settings">Actions with the account</string>
+    <string name="sign_out_settings">Sign out</string>
+    <string name="sign_out_summary">Sign out of your account</string>
+    <string name="delete_account_settings">Delete account</string>
+    <string name="delete_account_summary">Deletion of all data without possibility of recovery</string>
+    <string name="progress_reset_settings">Progress reset</string>
+    <string name="progress_reset_summary">Resetting your character\'s progress, including task lists and tasks</string>
+    <string name="progress_reset_successful">Progress has been successfully reset</string>
+    <string name="delete_account_successful">Account deleted successfully! Please restart the application!</string>
+    <string name="settings_fragment_label">Settings</string>
+    <string name="skill_fragment_label">Skill</string>
+    <string name="create_skill_dialog_title">Enter the name of the skill</string>
+    <string name="create_skill_hint">Skill name</string>
+    <string name="level_string">Level: %1$d</string>
+    <string name="easy_difficulty">Easy</string>
+    <string name="medium_difficulty">Medium</string>
+    <string name="hard_difficulty">Hard</string>
+    <string name="yes_dialog_button">Yes</string>
+    <string name="no_dialog_button">No</string>
+    <string name="delete_task_dialog_title">Are you sure you want to delete this task?</string>
+    <string name="percent_string" translatable="false">%1$d%%</string>
+    <string name="skill_delete">Delete a skill</string>
+    <string name="skill_save">Save the skill</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="no_connection_header_text">No Internet connection</string>
+    <string name="no_connection_text">Please check the Wi-Fi or mobile network connection</string>
+    <string name="leaderboard_fragment_label">Leaderboard</string>
+    <string name="leaderboard_string" translatable="false">№%1$d %2$s</string>
+    <string name="delete_list_dialog_title">Are you sure you want to delete this list?</string>
+    <string name="delete_skill_dialog_title">Are you sure you want to remove this skill?</string>
+    <string name="skills_character_label">Skills:</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
+</resources>

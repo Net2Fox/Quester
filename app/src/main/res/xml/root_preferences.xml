@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/account_settings">
+
+        <Preference
+            app:key="signout"
+            app:title="@string/sign_out_settings"
+            app:summary="@string/sign_out_summary"/>
+
+        <Preference
+            app:key="delete"
+            app:title="@string/delete_account_settings"
+            app:summary="@string/delete_account_summary"/>
+
+        <Preference
+            app:key="reset"
+            app:title="@string/progress_reset_settings"
+            app:summary="@string/progress_reset_summary"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

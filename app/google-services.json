@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "121859419624",
+    "project_id": "quester-9f0e3",
+    "storage_bucket": "quester-9f0e3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121859419624:android:6e471a1c2e0bc4fc6b885d",
+        "android_client_info": {
+          "package_name": "ru.net2fox.quester"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121859419624-1l9u21oggbbi5qorfsiq4hpa4aji514v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.net2fox.quester",
+            "certificate_hash": "ff48a62fb6bcd85e215cb69aff2ed44ca42e8527"
+          }
+        },
+        {
+          "client_id": "121859419624-gk3mdp92rk3lojvt8ih8pdnscda9bon7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzCV4xX2Yw9uRK64Efxtx4zmgTvwTurfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121859419624-gk3mdp92rk3lojvt8ih8pdnscda9bon7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
