@@ -1,17 +1,14 @@
 package ru.net2fox.quester
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import ru.net2fox.quester.data.auth.AuthDataSource
 import ru.net2fox.quester.data.auth.AuthRepository
-import ru.net2fox.quester.data.database.DatabaseDataSource
 import ru.net2fox.quester.data.database.DatabaseRepository
 
 class Quester : Application() {
@@ -22,18 +19,17 @@ class Quester : Application() {
         DynamicColors.applyToActivitiesIfAvailable(this)
         FirebaseApp.initializeApp(this)
         FirebaseAuth.getInstance().useAppLanguage()
-        DatabaseDataSource.initialize(this)
-        DatabaseRepository.initialize(this)
-        AuthDataSource.initialize(this)
-        AuthRepository.initialize(this)
+        DatabaseRepository.initialize()
+        AuthRepository.initialize()
 
         kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                DatabaseDataSource.get().getLastId()
+            DatabaseRepository.get().getLastId()
         }
     }
 
     companion object {
 
+        @SuppressLint("StaticFieldLeak")
         private lateinit var _context: Context
 
         fun setContext(context: Context) {
