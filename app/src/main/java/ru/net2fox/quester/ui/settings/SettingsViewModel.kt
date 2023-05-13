@@ -3,14 +3,9 @@ package ru.net2fox.quester.ui.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
-import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.auth.AuthRepository
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.ListOfTasks
-import ru.net2fox.quester.ui.list.ListActionResult
-import ru.net2fox.quester.ui.list.ListResult
 
 class SettingsViewModel : ViewModel() {
 
@@ -43,7 +38,7 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    suspend fun signOut() {
+    fun signOut() {
         authRepository.signOut()
     }
 }

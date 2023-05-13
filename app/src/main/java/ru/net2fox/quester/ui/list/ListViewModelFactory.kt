@@ -2,7 +2,6 @@ package ru.net2fox.quester.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ru.net2fox.quester.ui.auth.signup.SignUpViewModel
 
 /**
  * Фабрика провайдера ViewModel для инстанцирования ListViewModel.

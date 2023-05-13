@@ -2,31 +2,24 @@ package ru.net2fox.quester.ui.leaderboard
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
-import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.User
-import ru.net2fox.quester.databinding.FragmentCharacterBinding
 import ru.net2fox.quester.databinding.FragmentLeaderboardBinding
-import ru.net2fox.quester.ui.character.CharacterFragment
-import ru.net2fox.quester.ui.character.CharacterFragmentDirections
-import ru.net2fox.quester.ui.character.CharacterViewModel
-import ru.net2fox.quester.ui.character.CharacterViewModelFactory
 
 class LeaderboardFragment : Fragment() {
 
@@ -50,7 +43,7 @@ class LeaderboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        leaderboardViewModel = ViewModelProvider(this, LeaderboardViewModelFactory()).get(LeaderboardViewModel::class.java)
+        leaderboardViewModel = ViewModelProvider(this, LeaderboardViewModelFactory())[LeaderboardViewModel::class.java]
         binding.recyclerViewUsers.layoutManager = LinearLayoutManager(context)
         adapter = UsersRecyclerViewAdapter(leaderboardViewModel)
         binding.recyclerViewUsers.adapter = adapter

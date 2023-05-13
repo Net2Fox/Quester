@@ -85,7 +85,7 @@ class ListViewModel : ViewModel() {
 
     fun getListById(id: Int): ListOfTasks? = _listResult.value?.success?.get(id)
     //fun getListByListId(listId: Int): ListOfTasks? = _listResult.value?.success?.find { it -> it.name == listId }
-    fun getListById(listId: String): ListOfTasks? = _listResult.value?.success?.find { it -> it.strId == listId }
+    fun getListById(listId: String): ListOfTasks? = _listResult.value?.success?.find { it.strId == listId }
     fun getListId(position: Int): String? = _listResult.value?.success?.get(position)?.strId
     fun contains(itemId: Int): Boolean = _listResult.value?.success?.contains(getListById(itemId)) ?: false
 }

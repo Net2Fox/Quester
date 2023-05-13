@@ -2,7 +2,6 @@ package ru.net2fox.quester.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ru.net2fox.quester.ui.list.ListViewModel
 
 /**
  * Фабрика провайдера ViewModel для инстанцирования SettingsViewModel.

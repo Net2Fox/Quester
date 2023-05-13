@@ -17,7 +17,7 @@ class ListViewPagerAdapter(private val fm: FragmentManager, lifecycle: Lifecycle
     override fun createFragment(position: Int): TaskFragment {
         val listId = listViewModel.getListById(position)?.strId!!
         val fragment = TaskFragment.newInstance(listId)
-        fragmentList.put(listId, fragment)
+        fragmentList[listId] = fragment
         return fragment
     }
 

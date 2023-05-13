@@ -7,10 +7,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.User
-import ru.net2fox.quester.ui.character.CharacterSkillActionResult
-import ru.net2fox.quester.ui.character.CharacterSkillResult
 
 class LeaderboardViewModel : ViewModel() {
 

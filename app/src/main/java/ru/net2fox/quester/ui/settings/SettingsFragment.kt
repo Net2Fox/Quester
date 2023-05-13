@@ -25,7 +25,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory()).get(SettingsViewModel::class.java)
+        settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory())[SettingsViewModel::class.java]
 
         settingsViewModel.settingsProgressResetResult.observe(viewLifecycleOwner,
             Observer { settingsResult ->

@@ -77,7 +77,7 @@ class ListFragment : Fragment() {
         tabSelectedIndicator = binding.tabs.tabSelectedIndicator
         tabTextColors = binding.tabs.tabTextColors
 
-        listViewModel = ViewModelProvider(  this, ListViewModelFactory()).get(ListViewModel::class.java)
+        listViewModel = ViewModelProvider(  this, ListViewModelFactory())[ListViewModel::class.java]
 
         // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()
@@ -243,12 +243,12 @@ class ListFragment : Fragment() {
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             //val listNameEditText: TextInputEditText? = dialogView.findViewById(R.id.editText)
-            val wantToCloseDialog: Boolean = listNameEditText?.text.toString().trim().isEmpty()
+            val wantToCloseDialog: Boolean = listNameEditText.text.toString().trim().isEmpty()
             // Если EditText пуст, отключите закрытие при нажатии на позитивную кнопку
             if (!wantToCloseDialog) {
                 alertDialog.dismiss()
                 lifecycleScope.launch(Dispatchers.IO) {
-                    listViewModel.editListOfTasks(listId!!, listNameEditText?.text.toString())
+                    listViewModel.editListOfTasks(listId, listNameEditText.text.toString())
                 }
             }
         }

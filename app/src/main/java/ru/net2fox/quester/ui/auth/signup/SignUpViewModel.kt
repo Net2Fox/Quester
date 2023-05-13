@@ -1,15 +1,14 @@
 package ru.net2fox.quester.ui.auth.signup
 
+import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.util.Patterns
 import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.R
+import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.auth.AuthRepository
 
 class SignUpViewModel : ViewModel() {

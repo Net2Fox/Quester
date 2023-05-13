@@ -1,7 +1,6 @@
 package ru.net2fox.quester.data.model
 
 import com.google.firebase.firestore.Exclude
-import com.google.firebase.firestore.PropertyName
 
 data class ListOfTasks(
     @get:Exclude

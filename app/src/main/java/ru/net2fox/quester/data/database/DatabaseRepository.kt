@@ -44,7 +44,7 @@ class DatabaseRepository {
         initializeUser()
     }
 
-    fun initializeUser() {
+    private fun initializeUser() {
         try {
             user = firebaseAuth.currentUser!!
             userReference = db.collection("users").document(user.uid)
@@ -119,7 +119,7 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun addId(obj: String) {
+    private suspend fun addId(obj: String) {
         val changeId: Map<String, Long> = when (obj) {
             "lists" -> {
                 hashMapOf(
@@ -664,7 +664,7 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun writeLog(obj: Task, action: Action): Boolean {
+    private suspend fun writeLog(obj: Task, action: Action): Boolean {
         return try {
             val objectRef = db.collection(user.uid).document()
                 .collection("lists").document(obj.listId!!)
@@ -686,7 +686,7 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun writeLog(obj: Skill, action: Action): Boolean {
+    private suspend fun writeLog(obj: Skill, action: Action): Boolean {
         return try {
             val objectRef = db.collection(user.uid).document()
                 .collection("skills").document(obj.strId!!)
@@ -707,7 +707,7 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun writeLog(
+    private suspend fun writeLog(
         objectRef: DocumentReference,
         action: Action,
         objectType: Object

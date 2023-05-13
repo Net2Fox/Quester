@@ -1,6 +1,5 @@
 package ru.net2fox.quester.ui.character
 
-import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.User
 
 /**

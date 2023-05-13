@@ -1,11 +1,8 @@
 package ru.net2fox.quester.ui.tasks.taskdetailed
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
@@ -14,6 +11,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -23,9 +21,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
@@ -33,9 +28,6 @@ import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.databinding.FragmentTaskDetailedBinding
-import ru.net2fox.quester.ui.character.CharacterFragment
-import ru.net2fox.quester.ui.character.CharacterFragmentDirections
-import ru.net2fox.quester.ui.character.CharacterViewModel
 
 private const val KEY_TASK_ID = "ru.net2fox.quester.ui.task.TASK_ID"
 
@@ -63,8 +55,7 @@ class TaskDetailedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        taskDetailedViewModel = ViewModelProvider(this, TaskDetailedViewModelFactory()).get(
-            TaskDetailedViewModel::class.java)
+        taskDetailedViewModel = ViewModelProvider(this, TaskDetailedViewModelFactory())[TaskDetailedViewModel::class.java]
         binding.recyclerViewSkills.layoutManager = LinearLayoutManager(context)
         adapterRecyclerView = SkillRecyclerViewAdapter(taskDetailedViewModel)
         binding.recyclerViewSkills.adapter = adapterRecyclerView

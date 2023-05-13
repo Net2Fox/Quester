@@ -9,10 +9,7 @@ import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.model.Skill
-import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.data.model.User
-import ru.net2fox.quester.ui.list.ListActionResult
-import ru.net2fox.quester.ui.tasks.TaskActionResult
 
 class CharacterViewModel : ViewModel() {
 

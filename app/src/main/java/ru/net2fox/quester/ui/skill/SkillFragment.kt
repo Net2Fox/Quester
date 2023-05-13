@@ -1,19 +1,18 @@
 package ru.net2fox.quester.ui.skill
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -24,14 +23,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
-import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.Skill
-import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.databinding.FragmentSkillBinding
-import ru.net2fox.quester.databinding.FragmentTaskDetailedBinding
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedFragmentArgs
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedViewModel
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedViewModelFactory
 
 private const val KEY_SKILL_ID = "ru.net2fox.quester.ui.skill.SKILL_ID"
 
@@ -57,7 +50,7 @@ class SkillFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        skillViewModel = ViewModelProvider(this, SkillViewModelFactory()).get(SkillViewModel::class.java)
+        skillViewModel = ViewModelProvider(this, SkillViewModelFactory())[SkillViewModel::class.java]
 
         // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()

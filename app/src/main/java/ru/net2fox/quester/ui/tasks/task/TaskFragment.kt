@@ -48,7 +48,7 @@ class TaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        taskViewModel = ViewModelProvider(this, TaskViewModelFactory()).get(TaskViewModel::class.java)
+        taskViewModel = ViewModelProvider(this, TaskViewModelFactory())[TaskViewModel::class.java]
 
         binding.recyclerViewTasks.layoutManager = LinearLayoutManager(context)
         adapter = TaskRecyclerViewAdapter(taskViewModel)

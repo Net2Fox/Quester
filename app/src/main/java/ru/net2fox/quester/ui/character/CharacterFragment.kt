@@ -72,7 +72,7 @@ class CharacterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        characterViewModel = ViewModelProvider(this, CharacterViewModelFactory()).get(CharacterViewModel::class.java)
+        characterViewModel = ViewModelProvider(this, CharacterViewModelFactory())[CharacterViewModel::class.java]
         binding.recyclerViewSkills.layoutManager = LinearLayoutManager(context)
         adapter = SkillRecyclerViewAdapter(characterViewModel)
         binding.recyclerViewSkills.adapter = adapter
@@ -179,7 +179,7 @@ class CharacterFragment : Fragment() {
             this.skill = skill
             skillNameTextView.text = skill.name
             progressBar.max = skill.needExperience
-            val per: Double = ((skill.experience.toDouble() / skill.needExperience.toDouble()) * 100).toDouble()
+            val per: Double = ((skill.experience.toDouble() / skill.needExperience.toDouble()) * 100)
             progressBar.progress = per.toInt()
             skillLevelTextView.text = getString(R.string.level_string, skill.level)
             skillPercentTextView.text = getString(R.string.percent_string, per.toInt())

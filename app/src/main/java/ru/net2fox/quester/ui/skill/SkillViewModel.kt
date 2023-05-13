@@ -4,16 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.Skill
-import ru.net2fox.quester.data.model.Task
-import ru.net2fox.quester.ui.tasks.TaskActionResult
-import ru.net2fox.quester.ui.tasks.task.TaskResult
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedResult
 
 class SkillViewModel : ViewModel() {
 
