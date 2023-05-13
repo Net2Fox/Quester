@@ -6,12 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +26,6 @@ import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.databinding.FragmentCharacterBinding
-import kotlin.math.sign
 
 class CharacterFragment : Fragment() {
 
@@ -191,7 +188,7 @@ class CharacterFragment : Fragment() {
         override fun onClick(v: View) {
             //TODO Переделать тап по элементам
             if (v is TextView) {
-                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(skill.id!!)
+                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(skill.strId!!)
                 findNavController().navigate(action)
             }
         }

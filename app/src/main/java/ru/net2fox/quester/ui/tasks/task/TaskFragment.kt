@@ -18,12 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.databinding.FragmentTaskBinding
 import ru.net2fox.quester.ui.list.ListFragmentDirections
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedFragment
 
 private const val KEY_LIST_ID = "ru.net2fox.quester.ui.task.LIST_ID"
 
@@ -133,7 +131,7 @@ class TaskFragment : Fragment() {
 
             }
             else if (v is TextView) {
-                val action = ListFragmentDirections.actionListFragmentToTaskDetailedFragment(task.id!!, arguments?.getString(
+                val action = ListFragmentDirections.actionListFragmentToTaskDetailedFragment(task.strId!!, arguments?.getString(
                     KEY_LIST_ID
                 )!!)
                 findNavController().navigate(action)

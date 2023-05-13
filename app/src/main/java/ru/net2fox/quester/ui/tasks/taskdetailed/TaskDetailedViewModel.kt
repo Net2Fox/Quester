@@ -38,8 +38,8 @@ class TaskDetailedViewModel : ViewModel() {
                 for (skill in skillsRef){
                     val skillDocument = skill.get().await()
                     skills.add(Skill(
-                        id = skillDocument.id,
-                        incId = skillDocument.get("id", Long::class.java)!!,
+                        strId = skillDocument.id,
+                        id = skillDocument.get("id", Long::class.java)!!,
                         name = skillDocument.getString("name")!!,
                         experience = skillDocument.get("experience", Int::class.java)!!,
                         level = skillDocument.get("level", Int::class.java)!!
@@ -49,9 +49,9 @@ class TaskDetailedViewModel : ViewModel() {
             }
             _taskDetailedResult.postValue(
                 TaskDetailedResult(success = Task(
-                    id = taskId,
+                    strId = taskId,
                     listId = listId,
-                    incId = document.get("id", Long::class.java)!!,
+                    id = document.get("id", Long::class.java)!!,
                     name = document.getString("name")!!,
                     difficulty = document.get("difficulty", Difficulty::class.java)!!,
                     description = document.getString("description")!!,
@@ -72,7 +72,7 @@ class TaskDetailedViewModel : ViewModel() {
             }
             for (skill in task.listSkills!!) {
                 _skillsRef.find { t ->
-                    t.id == skill.id
+                    t.id == skill.strId
                 }?.let {
                     task.skills!!.add(it)
                 }
@@ -94,7 +94,7 @@ class TaskDetailedViewModel : ViewModel() {
             }
             for (skill in task.listSkills!!) {
                 _skillsRef.find { t ->
-                    t.id == skill.id
+                    t.id == skill.strId
                 }?.let {
                     task.skills!!.add(it)
                 }

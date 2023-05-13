@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.R
@@ -14,7 +13,6 @@ import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.ui.tasks.TaskActionResult
-import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedResult
 
 class TaskViewModel : ViewModel() {
 
@@ -41,8 +39,8 @@ class TaskViewModel : ViewModel() {
                         val skillDocument = skill.get().await()
                         skills.add(
                             Skill(
-                                id = skillDocument.id,
-                                incId = skillDocument.get("id", Long::class.java)!!,
+                                strId = skillDocument.id,
+                                id = skillDocument.get("id", Long::class.java)!!,
                                 name = skillDocument.getString("name")!!,
                                 experience = skillDocument.get("experience", Int::class.java)!!,
                                 level = skillDocument.get("level", Int::class.java)!!

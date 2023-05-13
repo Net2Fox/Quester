@@ -1,19 +1,13 @@
 package ru.net2fox.quester.ui.list
 
-import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.model.ListOfTasks
-import ru.net2fox.quester.ui.auth.signup.SignUpFormState
-import ru.net2fox.quester.ui.auth.signup.SignUpResult
 
 class ListViewModel : ViewModel() {
 
@@ -91,7 +85,7 @@ class ListViewModel : ViewModel() {
 
     fun getListById(id: Int): ListOfTasks? = _listResult.value?.success?.get(id)
     //fun getListByListId(listId: Int): ListOfTasks? = _listResult.value?.success?.find { it -> it.name == listId }
-    fun getListById(listId: String): ListOfTasks? = _listResult.value?.success?.find { it -> it.id == listId }
-    fun getListId(position: Int): String? = _listResult.value?.success?.get(position)?.id
+    fun getListById(listId: String): ListOfTasks? = _listResult.value?.success?.find { it -> it.strId == listId }
+    fun getListId(position: Int): String? = _listResult.value?.success?.get(position)?.strId
     fun contains(itemId: Int): Boolean = _listResult.value?.success?.contains(getListById(itemId)) ?: false
 }

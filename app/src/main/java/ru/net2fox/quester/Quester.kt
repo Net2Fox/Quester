@@ -15,7 +15,7 @@ class Quester : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        setContext(this)
+        _context = this
         DynamicColors.applyToActivitiesIfAvailable(this)
         FirebaseApp.initializeApp(this)
         FirebaseAuth.getInstance().useAppLanguage()
@@ -31,10 +31,6 @@ class Quester : Application() {
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var _context: Context
-
-        fun setContext(context: Context) {
-            _context = context
-        }
 
         fun getContext(): Context {
             return _context
