@@ -1,0 +1,127 @@
+package ru.net2fox.quester.ui.moderator.log
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import ru.net2fox.quester.R
+import ru.net2fox.quester.data.model.UserLog
+import ru.net2fox.quester.databinding.FragmentLogBinding
+
+class LogFragment : Fragment() {
+
+    private var _binding: FragmentLogBinding? = null
+    private lateinit var logViewModel: LogViewModel
+    private lateinit var adapter: LogRecyclerViewAdapter
+
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentLogBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        logViewModel = ViewModelProvider(this)[LogViewModel::class.java]
+
+        binding.recyclerViewLogs.layoutManager = LinearLayoutManager(context)
+        adapter = LogRecyclerViewAdapter(logViewModel)
+        binding.recyclerViewLogs.adapter = adapter
+        logViewModel.logResult.observe(
+            viewLifecycleOwner,
+            Observer { logs ->
+                logs?.let { log ->
+                    log.error?.let {
+                        showToastFail(it)
+                    }
+                    log.success?.let {
+                        updateUI()
+                    }
+                }
+            }
+        )
+
+        binding.swipeRefresh.setOnRefreshListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                logViewModel.getLogs()
+            }
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            logViewModel.getLogs()
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun updateUI() {
+        binding.recyclerViewLogs.adapter!!.notifyDataSetChanged()
+        if (binding.swipeRefresh.isRefreshing) {
+            binding.swipeRefresh.isRefreshing = false
+        }
+    }
+
+    private fun showToastFail(@StringRes errorString: Int) {
+        val appContext = context?.applicationContext ?: return
+        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private inner class LogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
+        private lateinit var log: UserLog
+
+        private val textView: TextView = itemView.findViewById(R.id.log_text_view)
+
+        init {
+            textView.setOnClickListener(this)
+        }
+
+        fun bind(log: UserLog) {
+            this.log = log
+            textView.text = getString(R.string.log_string, log.userName, log.action.toString(), log.objectType.toString(), log.objectName)
+        }
+
+        override fun onClick(v: View) {
+
+        }
+    }
+
+    private inner class LogRecyclerViewAdapter(private val logViewModel: LogViewModel) : RecyclerView.Adapter<LogViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogViewHolder {
+            val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_log, parent, false)
+            return LogViewHolder(itemView)
+        }
+
+        override fun onBindViewHolder(holder: LogViewHolder, position: Int) {
+            val log = logViewModel.logResult.value?.success?.get(position)
+            if (log != null) {
+                holder.bind(log)
+            }
+        }
+
+        override fun getItemCount(): Int {
+            return logViewModel.logResult.value?.success?.size ?: 0
+        }
+    }
+}

@@ -9,7 +9,9 @@ data class Skill(
     var name: String,
     var experience: Int = 0,
     var needExperience: Int = 100,
-    var level: Int = 1
+    var level: Int = 1,
+    @field:JvmField
+    var isDeleted: Boolean = false,
 ) {
     override fun toString(): String {
         return name

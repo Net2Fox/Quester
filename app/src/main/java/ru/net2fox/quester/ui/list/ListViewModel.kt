@@ -7,7 +7,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.ListOfTasks
+import ru.net2fox.quester.data.model.TaskList
 
 class ListViewModel : ViewModel() {
 
@@ -29,9 +29,9 @@ class ListViewModel : ViewModel() {
 
         if (result is Result.Success) {
             val query: QuerySnapshot = result.data;
-            val mutableList: MutableList<ListOfTasks> = mutableListOf()
+            val mutableList: MutableList<TaskList> = mutableListOf()
             for (postDocument in query) {
-                mutableList.add(ListOfTasks(
+                mutableList.add(TaskList(
                     postDocument.id,
                     postDocument.get("id", Long::class.java)!!,
                     postDocument.getString("name")!!
@@ -83,9 +83,9 @@ class ListViewModel : ViewModel() {
         }
     }
 
-    fun getListById(id: Int): ListOfTasks? = _listResult.value?.success?.get(id)
+    fun getListById(id: Int): TaskList? = _listResult.value?.success?.get(id)
     //fun getListByListId(listId: Int): ListOfTasks? = _listResult.value?.success?.find { it -> it.name == listId }
-    fun getListById(listId: String): ListOfTasks? = _listResult.value?.success?.find { it.strId == listId }
+    fun getListById(listId: String): TaskList? = _listResult.value?.success?.find { it.strId == listId }
     fun getListId(position: Int): String? = _listResult.value?.success?.get(position)?.strId
     fun contains(itemId: Int): Boolean = _listResult.value?.success?.contains(getListById(itemId)) ?: false
 }

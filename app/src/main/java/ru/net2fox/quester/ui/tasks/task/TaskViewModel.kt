@@ -57,8 +57,8 @@ class TaskViewModel : ViewModel() {
                     postDocument.get("difficulty", Difficulty::class.java)!!,
                     postDocument.getString("description")!!,
                     postDocument.getBoolean("isExecuted")!!,
-                    skills,
-                    skillsRef
+                    listSkills = skills,
+                    skills = skillsRef
                 ))
             }
             _taskResult.postValue(TaskResult(success = mutableTasks))

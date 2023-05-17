@@ -15,7 +15,7 @@ import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.model.Action
 import ru.net2fox.quester.data.model.Difficulty
-import ru.net2fox.quester.data.model.ListOfTasks
+import ru.net2fox.quester.data.model.TaskList
 import ru.net2fox.quester.data.model.Object
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.Task
@@ -31,8 +31,15 @@ class DatabaseRepository {
     //TODO Переписать всю часть получения данных, сделать кеширование, подробнее смотри в ChatGPT "Clean architecture и MVVM"
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
+
+    // Кеширование
     private lateinit var user: FirebaseUser
     private lateinit var userReference: DocumentReference
+
+    private lateinit var currentUser: User
+    private lateinit var userTaskLists: TaskList
+    private lateinit var userSkills: Skill
+    private lateinit var moderatorLogs: UserLog
 
     private var skillLastId: Long = 0
     private var listLastId: Long = 0
@@ -65,6 +72,7 @@ class DatabaseRepository {
                 listsCount = userSnapshot.get("listsCount", Long::class.java)!!,
                 skillsCount = userSnapshot.get("skillsCount", Long::class.java)!!,
                 tasksCount = userSnapshot.get("tasksCount", Long::class.java)!!,
+                isDeleted = userSnapshot.getBoolean("isDeleted")!!
             )
             listLastId = currentUser.listsCount
             taskLastId = currentUser.tasksCount
@@ -72,48 +80,6 @@ class DatabaseRepository {
 
             val logsCount = db.collection("counters").document("logs").get().await()
             logsLastId = logsCount.get("count", Long::class.java)!!
-
-            //val userData = db.collection("users")
-            //    .document(user!!.uid)
-            //val skillList = userData.collection("skills")
-            //    .orderBy("id")
-            //    .get()
-            //    .await()
-            //    .documents
-//
-            //if (skillList.size != 0) {
-            //    skillLastId = skillList
-            //        .last()
-            //        .get("id", Long::class.java)!!
-            //}
-//
-            //val listsList = userData.collection("lists")
-            //    .orderBy("id")
-            //    .get()
-            //    .await()
-            //    .documents
-//
-            //if (listsList.size != 0) {
-            //    listLastId = listsList.last()
-            //        .get("id", Long::class.java)!!
-            //}
-//
-            //val allTasks: MutableList<DocumentSnapshot> = mutableListOf()
-//
-            //for (list in listsList) {
-            //    val tasks = list.reference
-            //        .collection("tasks")
-            //        .get()
-            //        .await()
-            //        .documents
-            //    if (tasks.size != 0) {
-            //        allTasks.addAll(tasks)
-            //    }
-            //}
-            //allTasks.sortBy {
-            //    it.get("id", Long::class.java)
-            //}
-            //taskLastId = allTasks.last().get("id", Long::class.java)!!
         } catch (e: Exception) {
             Log.d("SkillLastId", e.message.toString())
         }
@@ -159,6 +125,7 @@ class DatabaseRepository {
     suspend fun getUserLeaderboard(): Result<QuerySnapshot> {
         return try {
             val result = db.collection("users")
+                .whereEqualTo("isDeleted", false)
                 .orderBy("level", Query.Direction.DESCENDING)
                 .orderBy("experience", Query.Direction.DESCENDING)
                 .orderBy("name", Query.Direction.ASCENDING)
@@ -207,26 +174,32 @@ class DatabaseRepository {
 
     private suspend fun deleteUserData(): Boolean {
         return try {
-            val querySnapshotTask =
-                db.collection("users").document(user.uid).collection("lists").get().await()
-            for (postDocument in querySnapshotTask) {
-                if (!deleteCollection(postDocument.reference.collection("tasks"), 5)) {
-                    return false
-                }
-            }
-            if (deleteCollection(
-                    db.collection("users").document(user.uid).collection("lists"),
-                    5
-                ) &&
-                deleteCollection(db.collection("users").document(user.uid).collection("skills"), 5)
-            ) {
-                db.collection("users").document(user.uid)
-                    .delete()
-                    .await()
-                return true
-            } else {
-                return false
-            }
+            //val querySnapshotTask =
+            //    db.collection("users").document(user.uid).collection("lists").get().await()
+            //for (postDocument in querySnapshotTask) {
+            //    if (!deleteCollection(postDocument.reference.collection("tasks"), 5)) {
+            //        return false
+            //    }
+            //}
+            //if (deleteCollection(
+            //        db.collection("users").document(user.uid).collection("lists"),
+            //        5
+            //    ) &&
+            //    deleteCollection(db.collection("users").document(user.uid).collection("skills"), 5)
+            //) {
+            //    db.collection("users").document(user.uid)
+            //        .delete()
+            //        .await()
+            //    return true
+            //} else {
+            //    return false
+            //}
+            val userRef = db.collection("users").document(user.uid)
+            userRef.set(hashMapOf(
+                "isDeleted" to true
+            ), SetOptions.merge()).await()
+            writeLog(userRef, Action.DELETE, Object.ACCOUNT)
+            true
         } catch (e: Exception) {
             e.message?.let { Log.d("deleteUserData", it) }
             false
@@ -297,6 +270,7 @@ class DatabaseRepository {
             val result = db.collection("users")
                 .document(user.uid)
                 .collection("lists")
+                .whereEqualTo("isDeleted", false)
                 .orderBy("id")
                 .get()
                 .await()
@@ -312,7 +286,7 @@ class DatabaseRepository {
                 .document(user.uid)
                 .collection("lists")
                 .add(
-                    ListOfTasks(
+                    TaskList(
                         id = listLastId,
                         name = listName
                     )
@@ -347,25 +321,36 @@ class DatabaseRepository {
 
     suspend fun deleteListOfTasks(listId: String): Boolean {
         return try {
-            if (deleteCollection(
-                    db.collection("users").document(user.uid)
-                        .collection("lists")
-                        .document(listId)
-                        .collection("tasks"), 5
-                )
-            ) {
-                val listRef = db.collection("users")
-                    .document(user.uid)
-                    .collection("lists")
-                    .document(listId)
-                listRef
-                    .delete()
-                    .await()
-                writeLog(listRef, Action.DELETE, Object.LIST)
-                return true
-            } else {
-                return false
-            }
+            //if (deleteCollection(
+            //        db.collection("users").document(user.uid)
+            //            .collection("lists")
+            //            .document(listId)
+            //            .collection("tasks"), 5
+            //    )
+            //) {
+            //    val listRef = db.collection("users")
+            //        .document(user.uid)
+            //        .collection("lists")
+            //        .document(listId)
+            //    listRef
+            //        .delete()
+            //        .await()
+            //    writeLog(listRef, Action.DELETE, Object.LIST)
+            //    return true
+            //} else {
+            //    return false
+            //}
+            val listRef = db.collection("users")
+                .document(user.uid)
+                .collection("lists")
+                .document(listId)
+            listRef
+                .set(hashMapOf(
+                    "isDeleted" to true
+                ), SetOptions.merge())
+                .await()
+            writeLog(listRef, Action.DELETE, Object.LIST)
+            true
         } catch (e: Exception) {
             false
         }
@@ -378,6 +363,7 @@ class DatabaseRepository {
                 .collection("lists")
                 .document(listId)
                 .collection("tasks")
+                .whereEqualTo("isDeleted", false)
                 .orderBy("id")
                 .get()
                 .await()
@@ -475,41 +461,41 @@ class DatabaseRepository {
                     .await()
             }
 
-            if (task.skills != null && task.isExecuted) {
+            if ((task.skills?.size ?: 0) != 0 && task.isExecuted) {
                 var skillChange: Map<String, Int>
-                val addExp: Int = when (task.difficulty) {
-                    Difficulty.EASY -> {
-                        5
-                    }
+                //val addExp: Int = when (task.difficulty) {
+                //    Difficulty.EASY -> {
+                //        5
+                //    }
 
-                    Difficulty.MEDIUM -> {
-                        15
-                    }
+                //    Difficulty.MEDIUM -> {
+                //        15
+                //    }
 
-                    Difficulty.HARD -> {
-                        30
-                    }
-                }
+                //    Difficulty.HARD -> {
+                //        30
+                //    }
+                //}
                 for (skillRef in task.skills!!) {
                     // Добавление опыта навыку
                     val skill = skillRef.get().await()
                     skillChange = if ((skill.get(
                             "experience",
                             Int::class.java
-                        )!! + addExp) >= skill.get("needExperience", Int::class.java)!!
+                        )!! + task.difficulty.addExp) >= skill.get("needExperience", Int::class.java)!!
                     ) {
                         hashMapOf(
                             "level" to skill.get("level", Int::class.java)!! + 1,
                             "experience" to (skill.get(
                                 "experience",
                                 Int::class.java
-                            )!! + addExp) - 100,
+                            )!! + task.difficulty.addExp) - 100,
                             "needExperience" to skill.get("needExperience", Int::class.java)!! * 2
                         )
 
                     } else {
                         hashMapOf(
-                            "experience" to skill.get("experience", Int::class.java)!! + addExp
+                            "experience" to skill.get("experience", Int::class.java)!! + task.difficulty.addExp
                         )
                     }
                     skillRef
@@ -526,14 +512,14 @@ class DatabaseRepository {
                             "experience" to (userDoc.get(
                                 "experience",
                                 Double::class.java
-                            )!! + (addExp.toDouble() / 2)) - 100
+                            )!! + (task.difficulty.addExp.toDouble() / 2)) - 100
                         )
                     } else {
                         hashMapOf(
                             "experience" to userDoc.get(
                                 "experience",
                                 Double::class.java
-                            )!! + (addExp.toDouble() / 2)
+                            )!! + (task.difficulty.addExp.toDouble() / 2)
                         )
                     }
                 db.collection("users")
@@ -556,7 +542,9 @@ class DatabaseRepository {
                 .document(task.listId!!)
                 .collection("tasks")
                 .document(task.strId!!)
-                .delete()
+                .set(hashMapOf(
+                    "isDeleted" to true
+                ), SetOptions.merge())
                 .await()
             writeLog(task, Action.DELETE)
             true
@@ -570,6 +558,7 @@ class DatabaseRepository {
             val result = db.collection("users")
                 .document(user.uid)
                 .collection("skills")
+                .whereEqualTo("isDeleted", false)
                 .orderBy("id")
                 .get()
                 .await()
@@ -634,7 +623,9 @@ class DatabaseRepository {
                 .document(user.uid)
                 .collection("skills")
                 .document(skill.strId!!)
-                .delete()
+                .set(hashMapOf(
+                    "isDeleted" to true
+                ), SetOptions.merge())
                 .await()
             writeLog(skill, Action.DELETE)
             true
@@ -643,9 +634,9 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun writeLog(obj: ListOfTasks, action: Action): Boolean {
+    suspend fun writeLog(obj: TaskList, action: Action): Boolean {
         return try {
-            val objectRef = db.collection(user.uid).document()
+            val objectRef = db.collection("users").document(user.uid)
                 .collection("lists").document(obj.strId!!)
             db.collection("logs")
                 .add(
@@ -666,7 +657,7 @@ class DatabaseRepository {
 
     private suspend fun writeLog(obj: Task, action: Action): Boolean {
         return try {
-            val objectRef = db.collection(user.uid).document()
+            val objectRef = db.collection("users").document(user.uid)
                 .collection("lists").document(obj.listId!!)
                 .collection("tasks").document(obj.strId!!)
             db.collection("logs")
@@ -688,7 +679,7 @@ class DatabaseRepository {
 
     private suspend fun writeLog(obj: Skill, action: Action): Boolean {
         return try {
-            val objectRef = db.collection(user.uid).document()
+            val objectRef = db.collection("users").document(user.uid)
                 .collection("skills").document(obj.strId!!)
             db.collection("logs")
                 .add(

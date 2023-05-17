@@ -12,5 +12,7 @@ data class User(
     var skillsCount: Long = -1,
     var tasksCount: Long = -1,
     @get:Exclude
-    var skills: MutableList<Skill>? = null
+    var skills: MutableList<Skill>? = null,
+    @field:JvmField
+    var isDeleted: Boolean = false
 )

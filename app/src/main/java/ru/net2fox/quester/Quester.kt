@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.data.auth.AuthRepository
 import ru.net2fox.quester.data.database.DatabaseRepository
+import ru.net2fox.quester.data.database.ModeratorRepository
 
 class Quester : Application() {
 
@@ -21,6 +22,7 @@ class Quester : Application() {
         FirebaseAuth.getInstance().useAppLanguage()
         DatabaseRepository.initialize()
         AuthRepository.initialize()
+        ModeratorRepository.initialize()
 
         kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
             DatabaseRepository.get().getLastId()

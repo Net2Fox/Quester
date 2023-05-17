@@ -14,6 +14,8 @@ data class Task(
     var description: String? = null,
     @field:JvmField
     var isExecuted: Boolean,
+    @field:JvmField
+    var isDeleted: Boolean = false,
     @get:Exclude
     var listSkills: MutableList<Skill>? = null,
     var skills: MutableList<DocumentReference>? = mutableListOf()

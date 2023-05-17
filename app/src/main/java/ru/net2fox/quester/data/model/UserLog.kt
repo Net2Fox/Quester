@@ -9,14 +9,15 @@ import com.google.firebase.firestore.ServerTimestamp
 class UserLog (
     @get:Exclude
     var strId: String? = null,
-    @get:PropertyName("id")
     var id: Long,
-    @get:PropertyName("user")
     var userRef: DocumentReference,
     @get:Exclude
     var user: User? = null,
-    @get:PropertyName("object")
+    @get:Exclude
+    var userName: String? = null,
     var objectRef: DocumentReference,
+    @get:Exclude
+    var objectName: String? = null,
     @get:Exclude
     var obj: Any? = null,
     @get:ServerTimestamp

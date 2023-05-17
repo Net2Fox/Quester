@@ -23,10 +23,13 @@ import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ru.net2fox.quester.data.auth.AuthRepository
 import ru.net2fox.quester.databinding.ActivityMainBinding
 import ru.net2fox.quester.ui.character.CharacterFragmentDirections
 import ru.net2fox.quester.ui.leaderboard.LeaderboardFragmentDirections
 import ru.net2fox.quester.ui.list.ListFragmentDirections
+import ru.net2fox.quester.ui.moderator.log.LogFragmentDirections
+import ru.net2fox.quester.ui.placeholder.PlaceholderFragmentDirections
 import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedFragmentDirections
 
 class MainActivity : AppCompatActivity() {
@@ -49,21 +52,30 @@ class MainActivity : AppCompatActivity() {
             R.id.characterFragment,
             R.id.listFragment,
             R.id.leaderboardFragment,
-            R.id.signInFragment
+            R.id.signInFragment,
+            R.id.logFragment
         ))
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNavigation.setupWithNavController(navController)
+        val defaultNavBarColor = window.navigationBarColor
         // Установка цвета системной панели навигации
         window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+        val hideBottomNavDestinations = setOf(
+            R.id.signInFragment,
+            R.id.signUpFragment,
+            R.id.taskDetailedFragment,
+            R.id.settingsFragment,
+            R.id.skillFragment,
+            R.id.logFragment
+        )
         navController.addOnDestinationChangedListener {_, destination, _ ->
-            if (destination.id == R.id.signInFragment ||
-                destination.id == R.id.signUpFragment ||
-                destination.id == R.id.taskDetailedFragment ||
-                destination.id == R.id.settingsFragment ||
-                destination.id == R.id.skillFragment) {
+            if (destination.id in hideBottomNavDestinations) {
                 binding.bottomNavigation.visibility = View.GONE
+                window.navigationBarColor = defaultNavBarColor
             } else {
                 binding.bottomNavigation.visibility = View.VISIBLE
+                window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
             }
             this.invalidateOptionsMenu()
         }
@@ -77,14 +89,22 @@ class MainActivity : AppCompatActivity() {
                 return when (menuItem.itemId) {
                     R.id.action_settings ->
                     {
-                        if (navController.currentDestination?.id == R.id.characterFragment) {
-                            navController.navigate(CharacterFragmentDirections.actionCharacterFragmentToSettingsFragment())
-                        } else if (navController.currentDestination?.id == R.id.listFragment) {
-                            navController.navigate(ListFragmentDirections.actionListFragmentToSettingsFragment())
-                        } else if (navController.currentDestination?.id == R.id.taskDetailedFragment) {
-                            navController.navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToSettingsFragment())
-                        } else if (navController.currentDestination?.id == R.id.leaderboardFragment) {
-                            navController.navigate(LeaderboardFragmentDirections.actionLeaderboardFragmentToSettingsFragment())
+                        when (navController.currentDestination?.id) {
+                            R.id.characterFragment -> {
+                                navController.navigate(CharacterFragmentDirections.actionCharacterFragmentToSettingsFragment())
+                            }
+                            R.id.listFragment -> {
+                                navController.navigate(ListFragmentDirections.actionListFragmentToSettingsFragment())
+                            }
+                            R.id.taskDetailedFragment -> {
+                                navController.navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToSettingsFragment())
+                            }
+                            R.id.leaderboardFragment -> {
+                                navController.navigate(LeaderboardFragmentDirections.actionLeaderboardFragmentToSettingsFragment())
+                            }
+                            R.id.logFragment -> {
+                                navController.navigate(LogFragmentDirections.actionLogFragmentToSettingsFragment())
+                            }
                         }
                         true
                     }
@@ -104,13 +124,22 @@ class MainActivity : AppCompatActivity() {
         })
 
         checkInternet()
-
         if (FirebaseAuth.getInstance().currentUser == null) {
-            navController.navigate(CharacterFragmentDirections.actionCharacterFragmentToSignInFragment())
+            navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToSignInFragment())
+        } else {
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (AuthRepository.get().isModerator()) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToLogFragment())
+                    }
+                } else {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToCharacterFragment())
+                    }
+                }
+            }
         }
     }
-
-
 
     private fun checkInternet() {
         val networkRequest = NetworkRequest.Builder()
