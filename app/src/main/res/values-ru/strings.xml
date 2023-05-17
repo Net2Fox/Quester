@@ -72,4 +72,14 @@
     <string name="delete_list_dialog_title">Вы точно хотите удалить этот список?</string>
     <string name="delete_skill_dialog_title">Вы точно хотите удалить этот навык?</string>
     <string name="skills_character_label">Навыки:</string>
+    <string name="enum_action_create">создал</string>
+    <string name="enum_action_edit">изменил</string>
+    <string name="enum_action_delete">удалил</string>
+    <string name="enum_action_mark_complete">отметил выполненной</string>
+    <string name="enum_object_task">задачу</string>
+    <string name="enum_object_skill">навык</string>
+    <string name="enum_object_list">список</string>
+    <string name="enum_object_account">аккаунт</string>
+    <string name="log_string">Пользователь %1$s %2$s %3$s \"%4$s\"</string>
+    <string name="log_fragment_label">Логи</string>
 </resources>

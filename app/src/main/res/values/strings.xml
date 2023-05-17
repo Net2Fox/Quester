@@ -90,6 +90,17 @@
     <string name="delete_list_dialog_title">Are you sure you want to delete this list?</string>
     <string name="delete_skill_dialog_title">Are you sure you want to remove this skill?</string>
     <string name="skills_character_label">Skills:</string>
+    <string name="enum_action_create">created</string>
+    <string name="enum_action_edit">edited</string>
+    <string name="enum_action_delete">deleted</string>
+    <string name="enum_action_mark_complete">marked accomplished</string>
+    <string name="enum_object_task">task</string>
+    <string name="enum_object_skill">skill</string>
+    <string name="enum_object_list">list</string>
+    <string name="enum_object_account">account</string>
+    <string name="log_string">User %1$s %2$s %3$s \"%4$s\"</string>
+    <string name="log_fragment_label">Logs</string>
+    <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
 </resources>
