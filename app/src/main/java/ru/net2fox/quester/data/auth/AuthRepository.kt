@@ -4,6 +4,8 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
@@ -16,6 +18,7 @@ class AuthRepository {
 
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val databaseRepository = DatabaseRepository.get()
+    private val db = Firebase.firestore
 
     // Реализация функции для регистрации нового пользователя по электронной почте и паролю
     suspend fun signUp(username: String, email: String, password: String): Result<AuthResult> {
@@ -40,6 +43,11 @@ class AuthRepository {
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    suspend fun isModerator(): Boolean {
+        val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
+        return result.getBoolean("isModerator")!!
     }
 
     fun signOut() {
