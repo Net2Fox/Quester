@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Quester</string>
 
@@ -39,7 +40,6 @@
     <string name="auth_failed_network">No internet connection</string>
     <string name="sign_up_failed_email_format">The email address is badly formatted</string>
     <string name="get_data_error">Failed to retrieve data</string>
-    <!-- TODO: Remove or change this placeholder text -->
 
     <!-- Create list alert dialog -->
     <string name="create_list_hint">List name</string>
@@ -82,7 +82,6 @@
     <string name="percent_string" translatable="false">%1$d%%</string>
     <string name="skill_delete">Delete a skill</string>
     <string name="skill_save">Save the skill</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="no_connection_header_text">No Internet connection</string>
     <string name="no_connection_text">Please check the Wi-Fi or mobile network connection</string>
     <string name="leaderboard_fragment_label">Leaderboard</string>
@@ -98,9 +97,6 @@
     <string name="enum_object_skill">skill</string>
     <string name="enum_object_list">list</string>
     <string name="enum_object_account">account</string>
-    <string name="log_string">User %1$s %2$s %3$s \"%4$s\"</string>
+    <string name="log_string">User %1$s %2$s %3$s "%4$s" \n\n%5$s %6$s</string>
     <string name="log_fragment_label">Logs</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <!-- TODO: Remove or change this placeholder text -->
-    <!-- TODO: Remove or change this placeholder text -->
 </resources>

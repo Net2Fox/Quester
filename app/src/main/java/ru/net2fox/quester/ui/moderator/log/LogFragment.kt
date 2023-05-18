@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.UserLog
 import ru.net2fox.quester.databinding.FragmentLogBinding
+import java.text.SimpleDateFormat
 
 class LogFragment : Fragment() {
 
@@ -39,8 +41,9 @@ class LogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         logViewModel = ViewModelProvider(this)[LogViewModel::class.java]
-
-        binding.recyclerViewLogs.layoutManager = LinearLayoutManager(context)
+        val layoutManager = LinearLayoutManager(context)
+        binding.recyclerViewLogs.layoutManager = layoutManager
+        binding.recyclerViewLogs.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
         adapter = LogRecyclerViewAdapter(logViewModel)
         binding.recyclerViewLogs.adapter = adapter
         logViewModel.logResult.observe(
@@ -89,7 +92,8 @@ class LogFragment : Fragment() {
     private inner class LogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         private lateinit var log: UserLog
-
+        private val dateFormat: SimpleDateFormat = SimpleDateFormat("dd.MM.yyyy")
+        private val timeFormat: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
         private val textView: TextView = itemView.findViewById(R.id.log_text_view)
 
         init {
@@ -98,7 +102,15 @@ class LogFragment : Fragment() {
 
         fun bind(log: UserLog) {
             this.log = log
-            textView.text = getString(R.string.log_string, log.userName, log.action.toString(), log.objectType.toString(), log.objectName)
+            val date = log.datetime?.toDate()
+            textView.text = getString(R.string.log_string,
+                log.userName,
+                log.action.toString(),
+                log.objectType.toString(),
+                log.objectName,
+                dateFormat.format(date),
+                timeFormat.format(date)
+            )
         }
 
         override fun onClick(v: View) {

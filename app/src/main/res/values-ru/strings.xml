@@ -80,6 +80,6 @@
     <string name="enum_object_skill">навык</string>
     <string name="enum_object_list">список</string>
     <string name="enum_object_account">аккаунт</string>
-    <string name="log_string">Пользователь %1$s %2$s %3$s \"%4$s\"</string>
+    <string name="log_string">Пользователь %1$s %2$s %3$s "%4$s" \n\n%5$s %6$s</string>
     <string name="log_fragment_label">Логи</string>
 </resources>
