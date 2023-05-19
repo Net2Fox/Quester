@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ru.net2fox.quester.MainActivity">
+
+    <item
+        android:id="@+id/action_filter"
+        android:orderInCategory="100"
+        android:title="@string/appbar_menu_filter"
+        android:icon="@drawable/ic_filter_list_24"
+        app:showAsAction="ifRoom" />
+</menu>

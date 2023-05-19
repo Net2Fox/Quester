@@ -28,7 +28,7 @@ import ru.net2fox.quester.data.model.UserLog
  */
 class ModeratorRepository {
 
-    //TODO Переписать всю часть получения данных, сделать кеширование, подробнее смотри в ChatGPT "Clean architecture и MVVM"
+    //TODO Сделать кеширование, подробнее смотри в ChatGPT "Clean architecture и MVVM"
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
 

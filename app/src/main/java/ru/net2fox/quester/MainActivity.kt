@@ -73,6 +73,8 @@ class MainActivity : AppCompatActivity() {
             if (destination.id in hideBottomNavDestinations) {
                 binding.bottomNavigation.visibility = View.GONE
                 window.navigationBarColor = defaultNavBarColor
+            } else if (destination.id == R.id.logFragment) {
+                //window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
             } else {
                 binding.bottomNavigation.visibility = View.VISIBLE
                 window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
