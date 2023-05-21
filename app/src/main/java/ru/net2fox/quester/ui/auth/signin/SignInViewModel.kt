@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.auth.AuthRepository
+import ru.net2fox.quester.data.model.FirebaseDeletedAccountException
 
 class SignInViewModel : ViewModel() {
 
@@ -39,6 +40,10 @@ class SignInViewModel : ViewModel() {
                 is FirebaseNetworkException -> {
                     // Обработка ошибки если нет доступа в интернет
                     _signInResult.postValue(SignInResult(error = R.string.auth_failed_network))
+                }
+                is FirebaseDeletedAccountException -> {
+                    // Обработка ошибки удалённого аккаунта
+                    _signInResult.postValue(SignInResult(error = R.string.sign_in_failed_account_deleted))
                 }
                 else -> {
                     // Общая обработка ошибки
