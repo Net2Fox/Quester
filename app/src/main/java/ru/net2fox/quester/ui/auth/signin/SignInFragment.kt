@@ -122,12 +122,6 @@ class SignInFragment : Fragment() {
     private fun updateUI() {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, R.string.sign_in_complete, Toast.LENGTH_LONG).show()
-        //val activity = requireActivity() as AppCompatActivity
-        //val fragmentManager = parentFragmentManager//activity.supportFragmentManager
-        //fragmentManager.beginTransaction()
-        //    .replace(R.id.nav_host_fragment_content_main, CharacterFragment())
-        //    .commit()
-        //findNavController().popBackStack()
         lifecycleScope.launch(Dispatchers.IO) {
             if (AuthRepository.get().isModerator()) {
                 lifecycleScope.launch(Dispatchers.Main) {
