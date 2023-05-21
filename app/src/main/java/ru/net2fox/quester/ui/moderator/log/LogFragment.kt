@@ -10,6 +10,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -192,6 +193,7 @@ class LogFragment : Fragment() {
                 dateFormat.format(date),
                 timeFormat.format(date)
             )
+            textView.startAnimation(AnimationUtils.loadAnimation(itemView.context, R.anim.recyclerview_item_anim))
         }
 
         override fun onClick(v: View) {
