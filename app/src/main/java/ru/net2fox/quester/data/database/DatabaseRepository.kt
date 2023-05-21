@@ -164,9 +164,10 @@ class DatabaseRepository {
         return try {
             val user = firebaseAuth.currentUser!!
             // Создание документа пользователя
-            db.collection("users").document(user.uid)
-                .set(User(user.displayName!!, 0, 1)).await()
+            val userRef = db.collection("users").document(user.uid)
+                userRef.set(User(user.displayName!!, 0, 1)).await()
             getLastId()
+            writeLog(userRef, Action.CREATE, Object.ACCOUNT)
             true
         } catch (e: Exception) {
             Log.d("FirebaseAuth", e.message.toString())
