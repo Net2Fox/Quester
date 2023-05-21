@@ -17,7 +17,9 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
+import ru.net2fox.quester.data.auth.AuthRepository
 import ru.net2fox.quester.databinding.FragmentSignInBinding
+import ru.net2fox.quester.ui.placeholder.PlaceholderFragmentDirections
 
 class SignInFragment : Fragment() {
 
@@ -126,7 +128,17 @@ class SignInFragment : Fragment() {
         //    .replace(R.id.nav_host_fragment_content_main, CharacterFragment())
         //    .commit()
         //findNavController().popBackStack()
-        findNavController().navigate(SignInFragmentDirections.actionSignInFragmentToCharacterFragment())
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (AuthRepository.get().isModerator()) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    findNavController().navigate(SignInFragmentDirections.actionSignInFragmentToLogFragment())
+                }
+            } else {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    findNavController().navigate(SignInFragmentDirections.actionSignInFragmentToCharacterFragment())
+                }
+            }
+        }
     }
 
     private fun showLoginFailed(@StringRes errorString: Int) {

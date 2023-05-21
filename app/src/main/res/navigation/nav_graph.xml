@@ -83,6 +83,15 @@
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_signInFragment_to_logFragment"
+            app:destination="@id/logFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/signUpFragment"
@@ -159,8 +168,7 @@
     <fragment
         android:id="@+id/placeholderFragment"
         android:name="ru.net2fox.quester.ui.placeholder.PlaceholderFragment"
-        android:label="fragment_placeholder"
-        tools:layout="@layout/fragment_placeholder" >
+        tools:layout="@layout/fragment_placeholder">
         <action
             android:id="@+id/action_placeholderFragment_to_logFragment"
             app:destination="@id/logFragment"

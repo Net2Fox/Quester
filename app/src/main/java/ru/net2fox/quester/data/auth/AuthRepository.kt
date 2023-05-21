@@ -1,5 +1,6 @@
 package ru.net2fox.quester.data.auth
 
+import android.util.Log
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -31,6 +32,7 @@ class AuthRepository {
             databaseRepository.initializeNewUser()
             Result.Success(authResult)
         } catch (e: Exception) {
+            Log.d("FirebaseAuth", e.message.toString())
             Result.Error(e)
         }
     }
@@ -39,8 +41,10 @@ class AuthRepository {
     suspend fun signIn(email: String, password: String): Result<AuthResult> {
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            databaseRepository.initializeUser()
             Result.Success(authResult)
         } catch (e: Exception) {
+            Log.d("FirebaseAuth", e.message.toString())
             Result.Error(e)
         }
     }

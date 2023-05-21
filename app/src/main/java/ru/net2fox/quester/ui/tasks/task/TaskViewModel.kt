@@ -13,6 +13,7 @@ import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.ui.tasks.TaskActionResult
+import java.util.Date
 
 class TaskViewModel : ViewModel() {
 

@@ -1,6 +1,7 @@
 package ru.net2fox.quester.data.database
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
@@ -21,6 +22,8 @@ import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.data.model.UserLog
+import java.util.Calendar
+import java.util.Date
 
 /**
  * Класс, который запрашивает информацию из удаленного источника данных
@@ -32,14 +35,38 @@ class ModeratorRepository {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
 
-    suspend fun getLogs(): Result<QuerySnapshot> {
+    suspend fun getLogs(timestamp: Timestamp? = null): Result<QuerySnapshot> {
         return try {
+            var currentDate = Timestamp.now()
+            if (timestamp != null) {
+                currentDate = timestamp
+            }
+
+            val startOfDay = Calendar.getInstance().apply {
+                time = Date(currentDate.seconds * 1000)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+            }.time
+
+            val endOfDay = Calendar.getInstance().apply {
+                time = Date(currentDate.seconds * 1000)
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+            }.time
+
+            val startOfDayTimestamp = Timestamp(startOfDay)
+            val endOfDayTimestamp = Timestamp(endOfDay)
             val result = db.collection("logs")
-                .orderBy("id")
+                .orderBy("datetime")
+                .whereGreaterThanOrEqualTo("datetime", startOfDayTimestamp)
+                .whereLessThanOrEqualTo("datetime", endOfDayTimestamp)
                 .get()
                 .await()
             Result.Success(result)
         } catch (e: Exception) {
+            Log.d("Firebase", e.message.toString())
             Result.Error(e)
         }
     }

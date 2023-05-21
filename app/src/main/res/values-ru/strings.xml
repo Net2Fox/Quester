@@ -83,4 +83,6 @@
     <string name="log_string">Пользователь %1$s %2$s %3$s "%4$s" \n\n%5$s %6$s</string>
     <string name="log_fragment_label">Логи</string>
     <string name="appbar_menu_filter">Фильтр</string>
+    <string name="datepicker_select_date">Выберите дату</string>
+    <string name="appbar_menu_search">Поиск пользователя</string>
 </resources>

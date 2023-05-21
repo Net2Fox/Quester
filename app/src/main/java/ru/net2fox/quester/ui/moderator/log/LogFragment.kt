@@ -1,5 +1,7 @@
 package ru.net2fox.quester.ui.moderator.log
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -21,14 +24,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.UserLog
 import ru.net2fox.quester.databinding.FragmentLogBinding
 import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
 
 class LogFragment : Fragment() {
 
@@ -80,11 +85,37 @@ class LogFragment : Fragment() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 // Add menu items here
                 menuInflater.inflate(R.menu.menu_log, menu)
+                val searchItem = menu.findItem(R.id.action_search)
+                val searchView = searchItem?.actionView as SearchView
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String): Boolean {
+                        if (query.isEmpty()) {
+                            logViewModel.filterLogsByUser(null)
+                        } else {
+                            logViewModel.filterLogsByUser(query)
+                        }
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String): Boolean {
+
+                        return false
+                    }
+                })
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.action_filter -> {
+                    R.id.action_date_filter -> {
+                        val datePicker =
+                            MaterialDatePicker.Builder.datePicker()
+                                .setTitleText(R.string.datepicker_select_date)
+                                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                                .build()
+                        datePicker.addOnPositiveButtonClickListener {
+                            updateData(Timestamp(Date(it)))
+                        }
+                        datePicker.show(parentFragmentManager, "tag")
                         true
                     }
                     else -> false
@@ -98,17 +129,35 @@ class LogFragment : Fragment() {
             }
         }
 
+        updateData()
+    }
+
+    private fun updateData(timestamp: Timestamp? = null) {
+        binding.loading.animate()
+            .alpha(1f)
+            .setDuration(0.toLong())
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.loading.visibility = View.VISIBLE
+                }
+            })
         lifecycleScope.launch(Dispatchers.IO) {
-            logViewModel.getLogs()
+            logViewModel.getLogs(timestamp)
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateUI() {
         binding.recyclerViewLogs.adapter!!.notifyDataSetChanged()
-        if (binding.swipeRefresh.isRefreshing) {
-            binding.swipeRefresh.isRefreshing = false
-        }
+        binding.loading.animate()
+            .alpha(0f)
+            .setDuration(500.toLong())
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.loading.visibility = View.GONE
+                }
+            })
+        binding.swipeRefresh.isRefreshing = false
     }
 
     private fun showToastFail(@StringRes errorString: Int) {

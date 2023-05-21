@@ -9,7 +9,7 @@ import com.google.firebase.firestore.ServerTimestamp
 class UserLog (
     @get:Exclude
     var strId: String? = null,
-    var id: Long,
+    //var id: Long,
     var userRef: DocumentReference,
     @get:Exclude
     var user: User? = null,

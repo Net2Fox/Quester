@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-
         val bottomNavigation = binding.bottomNavigation
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment).navController
         appBarConfiguration = AppBarConfiguration(setOf(
@@ -53,7 +52,8 @@ class MainActivity : AppCompatActivity() {
             R.id.listFragment,
             R.id.leaderboardFragment,
             R.id.signInFragment,
-            R.id.logFragment
+            R.id.logFragment,
+            R.id.placeholderFragment
         ))
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -61,20 +61,20 @@ class MainActivity : AppCompatActivity() {
         val defaultNavBarColor = window.navigationBarColor
         // Установка цвета системной панели навигации
         window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
         val hideBottomNavDestinations = setOf(
             R.id.signInFragment,
             R.id.signUpFragment,
             R.id.taskDetailedFragment,
             R.id.settingsFragment,
             R.id.skillFragment,
-            R.id.logFragment
+            R.id.logFragment,
+            R.id.placeholderFragment
         )
         navController.addOnDestinationChangedListener {_, destination, _ ->
             if (destination.id in hideBottomNavDestinations) {
                 binding.bottomNavigation.visibility = View.GONE
                 window.navigationBarColor = defaultNavBarColor
-            } else if (destination.id == R.id.logFragment) {
-                //window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
             } else {
                 binding.bottomNavigation.visibility = View.VISIBLE
                 window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
@@ -118,7 +118,8 @@ class MainActivity : AppCompatActivity() {
                 super.onPrepareMenu(menu)
                 if (navController.currentDestination?.id == R.id.settingsFragment ||
                     navController.currentDestination?.id == R.id.signInFragment ||
-                    navController.currentDestination?.id == R.id.signUpFragment
+                    navController.currentDestination?.id == R.id.signUpFragment ||
+                    navController.currentDestination?.id == R.id.placeholderFragment
                 ) {
                     menu.findItem(R.id.action_settings).isVisible = false
                 }
@@ -188,7 +189,8 @@ class MainActivity : AppCompatActivity() {
             val destination = findNavController(R.id.nav_host_fragment_content_main).currentDestination!!
             if (destination.id == R.id.signInFragment ||
                 destination.id == R.id.signUpFragment ||
-                destination.id == R.id.settingsFragment) {
+                destination.id == R.id.settingsFragment ||
+                destination.id == R.id.placeholderFragment) {
                 binding.bottomNavigation.visibility = View.GONE
             } else {
                 binding.bottomNavigation.visibility = View.VISIBLE

@@ -45,13 +45,13 @@ class DatabaseRepository {
     private var listLastId: Long = 0
     private var taskLastId: Long = 0
 
-    private var logsLastId: Long = 0
+    //private var logsLastId: Long = 0
 
     init {
         initializeUser()
     }
 
-    private fun initializeUser() {
+    fun initializeUser() {
         try {
             user = firebaseAuth.currentUser!!
             userReference = db.collection("users").document(user.uid)
@@ -78,10 +78,9 @@ class DatabaseRepository {
             taskLastId = currentUser.tasksCount
             skillLastId = currentUser.skillsCount
 
-            val logsCount = db.collection("counters").document("logs").get().await()
-            logsLastId = logsCount.get("count", Long::class.java)!!
+            //val logsCount = db.collection("counters").document("logs").get().await()
+            //logsLastId = logsCount.get("count", Long::class.java)!!
         } catch (e: Exception) {
-            Log.d("SkillLastId", e.message.toString())
         }
     }
 
@@ -105,21 +104,22 @@ class DatabaseRepository {
                 )
             }
 
-            "logs" -> {
-                hashMapOf(
-                    "count" to ++logsLastId
-                )
-            }
+            //"logs" -> {
+            //    hashMapOf(
+            //        "count" to ++logsLastId
+            //    )
+            //}
 
             else -> {
                 throw Exception("No ID")
             }
         }
-        if (obj == "logs") {
-            db.collection("counters").document("logs").set(changeId).await()
-        } else {
-            userReference.set(changeId, SetOptions.merge()).await()
-        }
+        userReference.set(changeId, SetOptions.merge()).await()
+        //if (obj == "logs") {
+        //    db.collection("counters").document("logs").set(changeId).await()
+        //} else {
+        //
+        //}
     }
 
     suspend fun getUserLeaderboard(): Result<QuerySnapshot> {
@@ -155,19 +155,21 @@ class DatabaseRepository {
             firebaseAuth.signOut()
             true
         } catch (e: Exception) {
+            Log.d("FirebaseAuth", e.message.toString())
             false
         }
     }
 
     private suspend fun createNewUserData(): Boolean {
         return try {
+            val user = firebaseAuth.currentUser!!
             // Создание документа пользователя
             db.collection("users").document(user.uid)
                 .set(User(user.displayName!!, 0, 1)).await()
             getLastId()
             true
         } catch (e: Exception) {
-            e.message?.let { Log.d("createNewUserData", it) }
+            Log.d("FirebaseAuth", e.message.toString())
             false
         }
     }
@@ -641,14 +643,14 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        id = logsLastId,
+                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.LIST
                     )
                 ).await()
-            addId("logs")
+            //addId("logs")
             true
         } catch (e: Exception) {
             false
@@ -663,14 +665,14 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        id = logsLastId,
+                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.TASK
                     )
                 ).await()
-            addId("logs")
+            //addId("logs")
             true
         } catch (e: Exception) {
             false
@@ -684,14 +686,14 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        id = logsLastId,
+                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.SKILL
                     )
                 ).await()
-            addId("logs")
+            //addId("logs")
             true
         } catch (e: Exception) {
             false
@@ -707,14 +709,14 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        id = logsLastId,
+                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = objectType
                     )
                 ).await()
-            addId("logs")
+            //addId("logs")
             true
         } catch (e: Exception) {
             Log.d("QuesterFirebase", e.message.toString())
