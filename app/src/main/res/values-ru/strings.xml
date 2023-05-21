@@ -85,4 +85,5 @@
     <string name="appbar_menu_filter">Фильтр</string>
     <string name="datepicker_select_date">Выберите дату</string>
     <string name="appbar_menu_search">Поиск пользователя</string>
+    <string name="sign_in_failed_account_deleted">Ваш аккаунт был удалён</string>
 </resources>
