@@ -10,6 +10,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
+import ru.net2fox.quester.data.model.FirebaseDeletedAccountException
 
 /**
  * Класс, который запрашивает аутентификацию и информацию о пользователе из удаленного источника данных
@@ -41,6 +42,9 @@ class AuthRepository {
     suspend fun signIn(email: String, password: String): Result<AuthResult> {
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            if (db.collection("users").document(authResult.user!!.uid).get().await().getBoolean("isDeleted") == true) {
+                throw FirebaseDeletedAccountException("Your account has been deleted")
+            }
             databaseRepository.initializeUser()
             Result.Success(authResult)
         } catch (e: Exception) {
