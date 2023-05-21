@@ -45,7 +45,6 @@ class DatabaseRepository {
     private var listLastId: Long = 0
     private var taskLastId: Long = 0
 
-    //private var logsLastId: Long = 0
 
     init {
         initializeUser()
@@ -56,7 +55,7 @@ class DatabaseRepository {
             user = firebaseAuth.currentUser!!
             userReference = db.collection("users").document(user.uid)
         } catch (e: Exception) {
-            Log.d("QuesterFirebase", e.message.toString())
+            Log.d("Firebase", e.message.toString())
         }
     }
 
@@ -77,10 +76,7 @@ class DatabaseRepository {
             listLastId = currentUser.listsCount
             taskLastId = currentUser.tasksCount
             skillLastId = currentUser.skillsCount
-
-            //val logsCount = db.collection("counters").document("logs").get().await()
-            //logsLastId = logsCount.get("count", Long::class.java)!!
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
     }
 
@@ -104,22 +100,11 @@ class DatabaseRepository {
                 )
             }
 
-            //"logs" -> {
-            //    hashMapOf(
-            //        "count" to ++logsLastId
-            //    )
-            //}
-
             else -> {
                 throw Exception("No ID")
             }
         }
         userReference.set(changeId, SetOptions.merge()).await()
-        //if (obj == "logs") {
-        //    db.collection("counters").document("logs").set(changeId).await()
-        //} else {
-        //
-        //}
     }
 
     suspend fun getUserLeaderboard(): Result<QuerySnapshot> {
@@ -165,7 +150,7 @@ class DatabaseRepository {
             val user = firebaseAuth.currentUser!!
             // Создание документа пользователя
             val userRef = db.collection("users").document(user.uid)
-                userRef.set(User(user.displayName!!, 0, 1)).await()
+            userRef.set(User(user.displayName!!, 0, 1)).await()
             getLastId()
             writeLog(userRef, Action.CREATE, Object.ACCOUNT)
             true
@@ -218,18 +203,12 @@ class DatabaseRepository {
         }
     }
 
-    // TODO Повторная аутентификация для удаления пользователя? https://firebase.google.com/docs/auth/android/manage-users?hl=ru#delete_a_user
     suspend fun deleteAccount(): Boolean {
         return try {
             val result = deleteUserData()
             if (result) {
                 try {
-                    //firebaseAuth.currentUser!!.reauthenticate(
-                    //    EmailAuthProvider
-                    //    .getCredential("test@test.com", "Net2Fox2003!"))
-                    //    .await()
-                    firebaseAuth.currentUser!!.delete()
-                        .await()
+                    firebaseAuth.signOut()
                 } catch (e: Exception) {
                     return false
                 }
@@ -262,7 +241,6 @@ class DatabaseRepository {
                 }
             true
         } catch (e: Exception) {
-            e.message?.let { Log.d("deleteCollection", it) }
             false
         }
     }
