@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
     <item
-        android:id="@+id/characterFragment"
+        android:id="@+id/userProfileFragment"
         android:enabled="true"
         android:icon="@drawable/ic_baseline_perm_identity_24"
-        android:title="@string/character_menu_item"/>
+        android:title="@string/user_profile_menu_item"/>
     <item
         android:id="@+id/listFragment"
         android:enabled="true"

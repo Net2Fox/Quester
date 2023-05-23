@@ -31,6 +31,7 @@ import ru.net2fox.quester.ui.list.ListFragmentDirections
 import ru.net2fox.quester.ui.moderator.log.LogFragmentDirections
 import ru.net2fox.quester.ui.placeholder.PlaceholderFragmentDirections
 import ru.net2fox.quester.ui.tasks.taskdetailed.TaskDetailedFragmentDirections
+import ru.net2fox.quester.ui.userprofile.UserProfileFragmentDirections
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         val bottomNavigation = binding.bottomNavigation
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment).navController
         appBarConfiguration = AppBarConfiguration(setOf(
+            R.id.userProfileFragment,
             R.id.characterFragment,
             R.id.listFragment,
             R.id.leaderboardFragment,
@@ -107,6 +109,9 @@ class MainActivity : AppCompatActivity() {
                             R.id.logFragment -> {
                                 navController.navigate(LogFragmentDirections.actionLogFragmentToSettingsFragment())
                             }
+                            R.id.userProfileFragment -> {
+                                navController.navigate(UserProfileFragmentDirections.actionUserProfileFragmentToSettingsFragment())
+                            }
                         }
                         true
                     }
@@ -137,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToCharacterFragment())
+                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToUserProfileFragment())
                     }
                 }
             }
