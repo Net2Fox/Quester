@@ -11,7 +11,7 @@ import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.model.Difficulty
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.ui.character.CharacterSkillResult
 import ru.net2fox.quester.ui.tasks.TaskActionResult
@@ -31,13 +31,13 @@ class TaskDetailedViewModel : ViewModel() {
 
         if (result is Result.Success) {
             val document: DocumentSnapshot = result.data;
-            var skills: MutableList<Skill>? = null
+            var userSkills: MutableList<UserSkill>? = null
             val skillsRef = document.get("skills") as ArrayList<DocumentReference>?
             if (skillsRef != null) {
-                skills = mutableListOf()
+                userSkills = mutableListOf()
                 for (skill in skillsRef){
                     val skillDocument = skill.get().await()
-                    skills.add(Skill(
+                    userSkills.add(UserSkill(
                         strId = skillDocument.id,
                         id = skillDocument.get("id", Long::class.java)!!,
                         name = skillDocument.getString("name")!!,
@@ -56,7 +56,7 @@ class TaskDetailedViewModel : ViewModel() {
                     difficulty = document.get("difficulty", Difficulty::class.java)!!,
                     description = document.getString("description")!!,
                     isExecuted = document.getBoolean("isExecuted")!!,
-                    listSkills = skills,
+                    listUserSkills = userSkills,
                     skills = skillsRef
             ))
             )
@@ -66,11 +66,11 @@ class TaskDetailedViewModel : ViewModel() {
     }
 
     suspend fun saveTask(task: Task) {
-        if (task.listSkills != null) {
+        if (task.listUserSkills != null) {
             if (task.skills == null) {
                 task.skills = mutableListOf()
             }
-            for (skill in task.listSkills!!) {
+            for (skill in task.listUserSkills!!) {
                 _skillsRef.find { t ->
                     t.id == skill.strId
                 }?.let {
@@ -88,11 +88,11 @@ class TaskDetailedViewModel : ViewModel() {
     }
 
     suspend fun taskMarkChange(task: Task, isComplete: Boolean, haveChanges: Boolean = false) {
-        if (haveChanges && task.listSkills != null) {
+        if (haveChanges && task.listUserSkills != null) {
             if (task.skills == null) {
                 task.skills = mutableListOf()
             }
-            for (skill in task.listSkills!!) {
+            for (skill in task.listUserSkills!!) {
                 _skillsRef.find { t ->
                     t.id == skill.strId
                 }?.let {
@@ -125,17 +125,17 @@ class TaskDetailedViewModel : ViewModel() {
     private val _skillsRef: MutableList<DocumentReference> = mutableListOf()
 
     suspend fun getSkills() {
-        val result = databaseRepository.getSkills()
+        val result = databaseRepository.getUserSkills()
 
         if (result is Result.Success) {
             val query: QuerySnapshot = result.data;
             for (document in query.documents) {
                 _skillsRef.add(document.reference)
             }
-            val mutableSkills: MutableList<Skill> = mutableListOf()
+            val mutableUserSkills: MutableList<UserSkill> = mutableListOf()
             for (postDocument in query) {
-                mutableSkills.add(
-                    Skill(
+                mutableUserSkills.add(
+                    UserSkill(
                         postDocument.id,
                         postDocument.get("id", Long::class.java)!!,
                         postDocument.getString("name")!!,
@@ -145,7 +145,7 @@ class TaskDetailedViewModel : ViewModel() {
                     )
                 )
             }
-            _skillsResult.postValue(CharacterSkillResult(success = mutableSkills))
+            _skillsResult.postValue(CharacterSkillResult(success = mutableUserSkills))
         } else {
             _skillsResult.postValue(CharacterSkillResult(error = R.string.get_data_error))
         }

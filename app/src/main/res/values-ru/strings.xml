@@ -88,4 +88,5 @@
     <string name="sign_in_failed_account_deleted">Ваш аккаунт был удалён</string>
     <string name="user_profile_fragment_label">Профиль пользователя</string>
     <string name="user_profile_menu_item">Профиль</string>
+    <string name="add_skill_dialog_title">Выберите навык, который хотите добавить</string>
 </resources>

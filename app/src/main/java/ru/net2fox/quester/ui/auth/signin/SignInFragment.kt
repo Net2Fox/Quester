@@ -129,7 +129,7 @@ class SignInFragment : Fragment() {
                 }
             } else {
                 lifecycleScope.launch(Dispatchers.Main) {
-                    findNavController().navigate(SignInFragmentDirections.actionSignInFragmentToCharacterFragment())
+                    findNavController().navigate(SignInFragmentDirections.actionSignInFragmentToUserProfileFragment())
                 }
             }
         }

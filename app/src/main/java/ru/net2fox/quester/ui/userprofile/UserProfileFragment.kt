@@ -1,37 +1,33 @@
 package ru.net2fox.quester.ui.userprofile
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.User
-import ru.net2fox.quester.data.model.UserLog
 import ru.net2fox.quester.databinding.FragmentUserProfileBinding
-import ru.net2fox.quester.ui.character.CharacterFragment
 import ru.net2fox.quester.ui.character.CharacterFragmentDirections
-import ru.net2fox.quester.ui.character.CharacterViewModel
-import ru.net2fox.quester.ui.moderator.log.LogViewModel
-import java.text.SimpleDateFormat
 
 class UserProfileFragment : Fragment() {
 
@@ -39,6 +35,7 @@ class UserProfileFragment : Fragment() {
     private lateinit var adapter: AchievementRecyclerViewAdapter
     private lateinit var userProfileViewModel: UserProfileViewModel
     private lateinit var currentUser: User
+    private lateinit var userSkills: List<UserSkill>
     private lateinit var skills: List<Skill>
     private lateinit var skillAdapter: SkillRecyclerViewAdapter
 
@@ -80,6 +77,21 @@ class UserProfileFragment : Fragment() {
             }
         )
 
+        userProfileViewModel.userSkillResult.observe(
+            viewLifecycleOwner,
+            Observer { userSkills ->
+                userSkills?.let { skillResult ->
+                    skillResult.error?.let {
+                        showToastFail(it)
+                    }
+                    skillResult.success?.let {
+                        this.userSkills = it
+                        updateUI()
+                    }
+                }
+            }
+        )
+
         userProfileViewModel.skillResult.observe(
             viewLifecycleOwner,
             Observer { skills ->
@@ -89,23 +101,28 @@ class UserProfileFragment : Fragment() {
                     }
                     skillResult.success?.let {
                         this.skills = it
-                        updateUI()
                     }
                 }
             }
         )
 
+        binding.addSkill.setOnClickListener {
+            addSkillMaterialAlertDialog()
+        }
+
         binding.swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch(Dispatchers.IO) {
-                userProfileViewModel.getSkills()
+                userProfileViewModel.getUserSkills()
                 userProfileViewModel.getUser()
+                userProfileViewModel.getSkills()
             }
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
             binding.swipeRefresh.isRefreshing = true
-            userProfileViewModel.getSkills()
+            userProfileViewModel.getUserSkills()
             userProfileViewModel.getUser()
+            userProfileViewModel.getSkills()
         }
     }
 
@@ -130,6 +147,36 @@ class UserProfileFragment : Fragment() {
     private fun showToastFail(@StringRes errorString: Int) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+    }
+
+    private fun addSkillMaterialAlertDialog() {
+
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle(R.string.add_skill_dialog_title)
+        val dialogView: View = LayoutInflater.from(this.context).inflate(R.layout.skill_alertdialog, null, false)
+        val skillsAdapter = ArrayAdapter(requireContext(), R.layout.item_difficulty, skills)
+        val autoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.auto_complete)
+        var selectedSkill: Skill? = null
+        autoComplete.setAdapter(skillsAdapter)
+        autoComplete.setOnItemClickListener { parent, view, position, id ->
+            val item = parent.getItemAtPosition(position)
+            if (item is Skill) {
+                selectedSkill = item
+            }
+        }
+        builder.setView(dialogView)
+        builder.setPositiveButton(R.string.ok_dialog_button, null)
+        builder.setNegativeButton(R.string.cancel_dialog_button, null)
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            // Если selectedSkill пуст, отключите закрытие при нажатии на позитивную кнопку
+            if (selectedSkill != null) {
+                alertDialog.dismiss()
+                //addTaskSkill(selectedUserSkill!!)
+                //updateUI(currnetTask)
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -191,7 +238,7 @@ class UserProfileFragment : Fragment() {
 
     private inner class SkillViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        private lateinit var skill: Skill
+        private lateinit var userSkill: UserSkill
 
         private val skillNameTextView: TextView = itemView.findViewById(R.id.text_view_skill_name)
         private val progressBar: LinearProgressIndicator = itemView.findViewById(R.id.progress_indicator)
@@ -202,20 +249,20 @@ class UserProfileFragment : Fragment() {
             skillNameTextView.setOnClickListener(this)
         }
 
-        fun bind(skill: Skill) {
-            this.skill = skill
-            skillNameTextView.text = skill.name
-            progressBar.max = skill.needExperience
-            val per: Double = ((skill.experience.toDouble() / skill.needExperience.toDouble()) * 100)
+        fun bind(userSkill: UserSkill) {
+            this.userSkill = userSkill
+            skillNameTextView.text = userSkill.name
+            progressBar.max = userSkill.needExperience
+            val per: Double = ((userSkill.experience.toDouble() / userSkill.needExperience.toDouble()) * 100)
             progressBar.progress = per.toInt()
-            skillLevelTextView.text = getString(R.string.level_string, skill.level)
+            skillLevelTextView.text = getString(R.string.level_string, userSkill.level)
             skillPercentTextView.text = getString(R.string.percent_string, per.toInt())
         }
 
         override fun onClick(v: View) {
             //TODO Переделать тап по элементам
             if (v is TextView) {
-                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(skill.strId!!)
+                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(userSkill.strId!!)
                 findNavController().navigate(action)
             }
         }
@@ -229,14 +276,14 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: SkillViewHolder, position: Int) {
-            val skill = userProfileViewModel.skillResult.value?.success?.get(position)
+            val skill = userProfileViewModel.userSkillResult.value?.success?.get(position)
             if (skill != null) {
                 holder.bind(skill)
             }
         }
 
         override fun getItemCount(): Int {
-            return userProfileViewModel.skillResult.value?.success?.size ?: 0
+            return userProfileViewModel.userSkillResult.value?.success?.size ?: 0
         }
     }
 }

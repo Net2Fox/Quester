@@ -105,5 +105,6 @@
     <string name="sign_in_failed_account_deleted">Your account has been deleted</string>
     <string name="user_profile_fragment_label">User profile</string>
     <string name="user_profile_menu_item">Profile</string>
+    <string name="add_skill_dialog_title">Select the skill you want to add</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

@@ -25,7 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.Difficulty
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.databinding.FragmentTaskDetailedBinding
 
@@ -33,7 +33,7 @@ private const val KEY_TASK_ID = "ru.net2fox.quester.ui.task.TASK_ID"
 
 class TaskDetailedFragment : Fragment() {
 
-    private lateinit var skills: List<Skill>
+    private lateinit var userSkills: List<UserSkill>
     private lateinit var currnetTask: Task
     private var _binding: FragmentTaskDetailedBinding? = null
     private lateinit var difficultyArrayAdapter: ArrayAdapter<Difficulty>
@@ -126,7 +126,7 @@ class TaskDetailedFragment : Fragment() {
             viewLifecycleOwner,
             Observer { skills ->
                 skills.success?.let {
-                    this.skills = it
+                    this.userSkills = it
                 }
             }
         )
@@ -171,11 +171,11 @@ class TaskDetailedFragment : Fragment() {
         }
     }
 
-    private fun addTaskSkill(skill: Skill) {
+    private fun addTaskSkill(userSkill: UserSkill) {
         if (currnetTask.skills == null) {
             currnetTask.skills = mutableListOf()
         }
-        currnetTask.listSkills?.add(skill)
+        currnetTask.listUserSkills?.add(userSkill)
     }
 
     private fun showToastFail(@StringRes errorString: Int) {
@@ -187,14 +187,14 @@ class TaskDetailedFragment : Fragment() {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(R.string.create_skill_dialog_title)
         val dialogView: View = LayoutInflater.from(this.context).inflate(R.layout.skill_alertdialog, null, false)
-        val skillsAdapter = ArrayAdapter(requireContext(), R.layout.item_difficulty, skills)
+        val skillsAdapter = ArrayAdapter(requireContext(), R.layout.item_difficulty, userSkills)
         val autoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.auto_complete)
-        var selectedSkill: Skill? = null
+        var selectedUserSkill: UserSkill? = null
         autoComplete.setAdapter(skillsAdapter)
         autoComplete.setOnItemClickListener { parent, view, position, id ->
             val item = parent.getItemAtPosition(position)
-            if (item is Skill) {
-                selectedSkill = item
+            if (item is UserSkill) {
+                selectedUserSkill = item
             }
         }
         builder.setView(dialogView)
@@ -204,9 +204,9 @@ class TaskDetailedFragment : Fragment() {
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             // Если selectedSkill пуст, отключите закрытие при нажатии на позитивную кнопку
-            if (selectedSkill != null) {
+            if (selectedUserSkill != null) {
                 alertDialog.dismiss()
-                addTaskSkill(selectedSkill!!)
+                addTaskSkill(selectedUserSkill!!)
                 updateUI(currnetTask)
             }
         }
@@ -234,13 +234,13 @@ class TaskDetailedFragment : Fragment() {
 
     private inner class SkillViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        private lateinit var skill: Skill
+        private lateinit var userSkill: UserSkill
 
         private val skillNameTextView: TextView = itemView.findViewById(R.id.text_view_skill_name)
 
-        fun bind(skill: Skill) {
-            this.skill = skill
-            skillNameTextView.text = skill.name
+        fun bind(userSkill: UserSkill) {
+            this.userSkill = userSkill
+            skillNameTextView.text = userSkill.name
         }
     }
 
@@ -252,14 +252,14 @@ class TaskDetailedFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: SkillViewHolder, position: Int) {
-            val skill = taskDetailedViewModel.taskDetailedResult.value?.success?.listSkills?.get(position)
+            val skill = taskDetailedViewModel.taskDetailedResult.value?.success?.listUserSkills?.get(position)
             if (skill != null) {
                 holder.bind(skill)
             }
         }
 
         override fun getItemCount(): Int {
-            return taskDetailedViewModel.taskDetailedResult.value?.success?.listSkills?.size ?: 0
+            return taskDetailedViewModel.taskDetailedResult.value?.success?.listUserSkills?.size ?: 0
         }
     }
 

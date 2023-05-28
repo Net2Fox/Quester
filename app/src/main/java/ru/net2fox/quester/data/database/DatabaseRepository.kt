@@ -3,7 +3,6 @@ package ru.net2fox.quester.data.database
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
@@ -17,7 +16,7 @@ import ru.net2fox.quester.data.model.Action
 import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.TaskList
 import ru.net2fox.quester.data.model.Object
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.data.model.UserLog
@@ -38,7 +37,7 @@ class DatabaseRepository {
 
     private lateinit var currentUser: User
     private lateinit var userTaskLists: TaskList
-    private lateinit var userSkills: Skill
+    private lateinit var userSkills: UserSkill
     private lateinit var moderatorLogs: UserLog
 
     private var skillLastId: Long = 0
@@ -148,9 +147,11 @@ class DatabaseRepository {
     private suspend fun createNewUserData(): Boolean {
         return try {
             val user = firebaseAuth.currentUser!!
-            // Создание документа пользователя
             val userRef = db.collection("users").document(user.uid)
-            userRef.set(User(user.displayName!!, 0, 1)).await()
+            userRef.set(User(
+                name = user.displayName!!,
+                experience = 0,
+                level = 1)).await()
             getLastId()
             writeLog(userRef, Action.CREATE, Object.ACCOUNT)
             true
@@ -162,26 +163,6 @@ class DatabaseRepository {
 
     private suspend fun deleteUserData(): Boolean {
         return try {
-            //val querySnapshotTask =
-            //    db.collection("users").document(user.uid).collection("lists").get().await()
-            //for (postDocument in querySnapshotTask) {
-            //    if (!deleteCollection(postDocument.reference.collection("tasks"), 5)) {
-            //        return false
-            //    }
-            //}
-            //if (deleteCollection(
-            //        db.collection("users").document(user.uid).collection("lists"),
-            //        5
-            //    ) &&
-            //    deleteCollection(db.collection("users").document(user.uid).collection("skills"), 5)
-            //) {
-            //    db.collection("users").document(user.uid)
-            //        .delete()
-            //        .await()
-            //    return true
-            //} else {
-            //    return false
-            //}
             val userRef = db.collection("users").document(user.uid)
             userRef.set(hashMapOf(
                 "isDeleted" to true
@@ -221,30 +202,6 @@ class DatabaseRepository {
             false
         }
     }
-
-    private fun deleteCollection(collection: CollectionReference, batchSize: Int): Boolean {
-        return try {
-            // Retrieve a small batch of documents to avoid out-of-memory errors/
-            var deleted = 0
-            collection
-                .limit(batchSize.toLong())
-                .get()
-                .addOnCompleteListener {
-                    for (document in it.result.documents) {
-                        document.reference.delete()
-                        ++deleted
-                    }
-                    if (deleted >= batchSize) {
-                        // retrieve and delete another batch
-                        deleteCollection(collection, batchSize)
-                    }
-                }
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
 
     suspend fun getListsOfTasks(): Result<QuerySnapshot> {
         return try {
@@ -302,25 +259,6 @@ class DatabaseRepository {
 
     suspend fun deleteListOfTasks(listId: String): Boolean {
         return try {
-            //if (deleteCollection(
-            //        db.collection("users").document(user.uid)
-            //            .collection("lists")
-            //            .document(listId)
-            //            .collection("tasks"), 5
-            //    )
-            //) {
-            //    val listRef = db.collection("users")
-            //        .document(user.uid)
-            //        .collection("lists")
-            //        .document(listId)
-            //    listRef
-            //        .delete()
-            //        .await()
-            //    writeLog(listRef, Action.DELETE, Object.LIST)
-            //    return true
-            //} else {
-            //    return false
-            //}
             val listRef = db.collection("users")
                 .document(user.uid)
                 .collection("lists")
@@ -444,19 +382,6 @@ class DatabaseRepository {
 
             if ((task.skills?.size ?: 0) != 0 && task.isExecuted) {
                 var skillChange: Map<String, Int>
-                //val addExp: Int = when (task.difficulty) {
-                //    Difficulty.EASY -> {
-                //        5
-                //    }
-
-                //    Difficulty.MEDIUM -> {
-                //        15
-                //    }
-
-                //    Difficulty.HARD -> {
-                //        30
-                //    }
-                //}
                 for (skillRef in task.skills!!) {
                     // Добавление опыта навыку
                     val skill = skillRef.get().await()
@@ -536,6 +461,18 @@ class DatabaseRepository {
 
     suspend fun getSkills(): Result<QuerySnapshot> {
         return try {
+            val result = db.collection("skills")
+                .orderBy("name")
+                .get()
+                .await()
+            Result.Success(result)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getUserSkills(): Result<QuerySnapshot> {
+        return try {
             val result = db.collection("users")
                 .document(user.uid)
                 .collection("skills")
@@ -549,7 +486,7 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun getSkill(skillId: String): Result<DocumentSnapshot> {
+    suspend fun getUserSkill(skillId: String): Result<DocumentSnapshot> {
         return try {
             val result = db.collection("users")
                 .document(user.uid)
@@ -563,13 +500,14 @@ class DatabaseRepository {
         }
     }
 
+    // TODO Переделать на добавление скилла
     suspend fun createSkill(skillName: String): Result<DocumentReference> {
         return try {
             val result = db.collection("users")
                 .document(user.uid)
                 .collection("skills")
                 .add(
-                    Skill(
+                    UserSkill(
                         id = skillLastId,
                         name = skillName
                     )
@@ -583,32 +521,17 @@ class DatabaseRepository {
         }
     }
 
-    suspend fun editSkill(skill: Skill): Boolean {
+    suspend fun deleteUserSkill(userSkill: UserSkill): Boolean {
         return try {
             db.collection("users")
                 .document(user.uid)
                 .collection("skills")
-                .document(skill.strId!!)
-                .set(skill, SetOptions.merge())
-                .await()
-            writeLog(skill, Action.EDIT)
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    suspend fun deleteSkill(skill: Skill): Boolean {
-        return try {
-            db.collection("users")
-                .document(user.uid)
-                .collection("skills")
-                .document(skill.strId!!)
+                .document(userSkill.strId!!)
                 .set(hashMapOf(
                     "isDeleted" to true
                 ), SetOptions.merge())
                 .await()
-            writeLog(skill, Action.DELETE)
+            writeLog(userSkill, Action.DELETE)
             true
         } catch (e: Exception) {
             false
@@ -622,14 +545,12 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.LIST
                     )
                 ).await()
-            //addId("logs")
             true
         } catch (e: Exception) {
             false
@@ -644,35 +565,31 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.TASK
                     )
                 ).await()
-            //addId("logs")
             true
         } catch (e: Exception) {
             false
         }
     }
 
-    private suspend fun writeLog(obj: Skill, action: Action): Boolean {
+    private suspend fun writeLog(obj: UserSkill, action: Action): Boolean {
         return try {
             val objectRef = db.collection("users").document(user.uid)
                 .collection("skills").document(obj.strId!!)
             db.collection("logs")
                 .add(
                     UserLog(
-                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = Object.SKILL
                     )
                 ).await()
-            //addId("logs")
             true
         } catch (e: Exception) {
             false
@@ -688,14 +605,12 @@ class DatabaseRepository {
             db.collection("logs")
                 .add(
                     UserLog(
-                        //id = logsLastId,
                         userRef = userReference,
                         objectRef = objectRef,
                         action = action,
                         objectType = objectType
                     )
                 ).await()
-            //addId("logs")
             true
         } catch (e: Exception) {
             Log.d("QuesterFirebase", e.message.toString())

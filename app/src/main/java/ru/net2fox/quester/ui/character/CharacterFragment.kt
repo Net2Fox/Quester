@@ -23,13 +23,13 @@ import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.databinding.FragmentCharacterBinding
 
 class CharacterFragment : Fragment() {
 
-    private lateinit var skills: List<Skill>
+    private lateinit var userSkills: List<UserSkill>
     private lateinit var currentUser: User
     private lateinit var characterViewModel: CharacterViewModel
     private var _binding: FragmentCharacterBinding? = null
@@ -84,7 +84,7 @@ class CharacterFragment : Fragment() {
                         showToastFail(it)
                     }
                     skillResult.success?.let {
-                        this.skills = it
+                        this.userSkills = it
                         updateUI()
                     }
                 }
@@ -164,7 +164,7 @@ class CharacterFragment : Fragment() {
 
     private inner class SkillViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        private lateinit var skill: Skill
+        private lateinit var userSkill: UserSkill
 
         private val skillNameTextView: TextView = itemView.findViewById(R.id.text_view_skill_name)
         private val progressBar: LinearProgressIndicator = itemView.findViewById(R.id.progress_indicator)
@@ -175,20 +175,20 @@ class CharacterFragment : Fragment() {
             skillNameTextView.setOnClickListener(this)
         }
 
-        fun bind(skill: Skill) {
-            this.skill = skill
-            skillNameTextView.text = skill.name
-            progressBar.max = skill.needExperience
-            val per: Double = ((skill.experience.toDouble() / skill.needExperience.toDouble()) * 100)
+        fun bind(userSkill: UserSkill) {
+            this.userSkill = userSkill
+            skillNameTextView.text = userSkill.name
+            progressBar.max = userSkill.needExperience
+            val per: Double = ((userSkill.experience.toDouble() / userSkill.needExperience.toDouble()) * 100)
             progressBar.progress = per.toInt()
-            skillLevelTextView.text = getString(R.string.level_string, skill.level)
+            skillLevelTextView.text = getString(R.string.level_string, userSkill.level)
             skillPercentTextView.text = getString(R.string.percent_string, per.toInt())
         }
 
         override fun onClick(v: View) {
             //TODO Переделать тап по элементам
             if (v is TextView) {
-                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(skill.strId!!)
+                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(userSkill.strId!!)
                 findNavController().navigate(action)
             }
         }

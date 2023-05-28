@@ -8,11 +8,14 @@ data class User(
     var level: Int,
     @field:JvmField
     var isModerator: Boolean = false,
+    @field:JvmField
+    var isDeleted: Boolean = false,
+    @field:JvmField
+    var isBlocked: Boolean = false,
     var listsCount: Long = -1,
     var skillsCount: Long = -1,
     var tasksCount: Long = -1,
     @get:Exclude
-    var skills: MutableList<Skill>? = null,
-    @field:JvmField
-    var isDeleted: Boolean = false
+    var userSkills: MutableList<UserSkill>? = null
+
 )

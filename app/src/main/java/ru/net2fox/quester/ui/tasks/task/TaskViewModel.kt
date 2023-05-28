@@ -10,10 +10,9 @@ import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.model.Difficulty
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.ui.tasks.TaskActionResult
-import java.util.Date
 
 class TaskViewModel : ViewModel() {
 
@@ -32,14 +31,14 @@ class TaskViewModel : ViewModel() {
             val query: QuerySnapshot = result.data;
             val mutableTasks: MutableList<Task> = mutableListOf()
             for (postDocument in query) {
-                var skills: MutableList<Skill>? = null
+                var userSkills: MutableList<UserSkill>? = null
                 val skillsRef = postDocument.get("skills") as ArrayList<DocumentReference>?
                 if (skillsRef != null) {
-                    skills = mutableListOf()
+                    userSkills = mutableListOf()
                     for (skill in skillsRef){
                         val skillDocument = skill.get().await()
-                        skills.add(
-                            Skill(
+                        userSkills.add(
+                            UserSkill(
                                 strId = skillDocument.id,
                                 id = skillDocument.get("id", Long::class.java)!!,
                                 name = skillDocument.getString("name")!!,
@@ -58,7 +57,7 @@ class TaskViewModel : ViewModel() {
                     postDocument.get("difficulty", Difficulty::class.java)!!,
                     postDocument.getString("description")!!,
                     postDocument.getBoolean("isExecuted")!!,
-                    listSkills = skills,
+                    listUserSkills = userSkills,
                     skills = skillsRef
                 ))
             }

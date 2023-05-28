@@ -23,14 +23,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.databinding.FragmentSkillBinding
 
 private const val KEY_SKILL_ID = "ru.net2fox.quester.ui.skill.SKILL_ID"
 
 class SkillFragment : Fragment() {
 
-    private lateinit var currnetSkill: Skill
+    private lateinit var currnetUserSkill: UserSkill
     private var _binding: FragmentSkillBinding? = null
     private val args: SkillFragmentArgs by navArgs()
     private lateinit var skillViewModel: SkillViewModel
@@ -73,13 +73,6 @@ class SkillFragment : Fragment() {
                         deleteSkillMaterialAlertDialog()
                         true
                     }
-                    R.id.action_save_skill -> {
-                        currnetSkill.name = binding.editTextName.text.toString()
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            skillViewModel.saveSkill(currnetSkill)
-                        }
-                        true
-                    }
                     else -> false
                 }
             }
@@ -92,8 +85,8 @@ class SkillFragment : Fragment() {
                     showToastFail(it)
                 }
                 skill.success?.let {
-                    currnetSkill = it
-                    updateUI(currnetSkill)
+                    currnetUserSkill = it
+                    updateUI(currnetUserSkill)
                 }
             }
         )
@@ -111,12 +104,12 @@ class SkillFragment : Fragment() {
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
-            skillViewModel.getSkill(args.skillId)
+            skillViewModel.getUserSkill(args.skillId)
         }
     }
 
-    private fun updateUI(skill: Skill) {
-        binding.editTextName.setText(skill.name)
+    private fun updateUI(userSkill: UserSkill) {
+        binding.editTextName.setText(userSkill.name)
     }
 
     private fun showToastFail(@StringRes errorString: Int) {
@@ -134,7 +127,7 @@ class SkillFragment : Fragment() {
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             alertDialog.dismiss()
             lifecycleScope.launch(Dispatchers.IO) {
-                skillViewModel.deleteSkill(currnetSkill)
+                skillViewModel.deleteUserSkill(currnetUserSkill)
             }
         }
     }

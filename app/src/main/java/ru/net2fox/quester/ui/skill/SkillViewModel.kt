@@ -7,7 +7,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 
 class SkillViewModel : ViewModel() {
 
@@ -19,13 +19,13 @@ class SkillViewModel : ViewModel() {
     private val _skillActionResult = MutableLiveData<SkillActionResult>()
     val skillActionResult: LiveData<SkillActionResult> = _skillActionResult
 
-    suspend fun getSkill(skillId: String) {
-        val result = databaseRepository.getSkill(skillId)
+    suspend fun getUserSkill(skillId: String) {
+        val result = databaseRepository.getUserSkill(skillId)
 
         if (result is Result.Success) {
             val document: DocumentSnapshot = result.data;
             _skillResult.postValue(
-                SkillResult(success = Skill(
+                SkillResult(success = UserSkill(
                     document.id,
                     document.get("id", Long::class.java)!!,
                     document.getString("name")!!,
@@ -39,18 +39,8 @@ class SkillViewModel : ViewModel() {
         }
     }
 
-    suspend fun saveSkill(skill: Skill) {
-        val result = databaseRepository.editSkill(skill)
-
-        if (result) {
-            _skillActionResult.postValue(SkillActionResult(success = true))
-        } else {
-            _skillActionResult.postValue(SkillActionResult(error = R.string.get_data_error))
-        }
-    }
-
-    suspend fun deleteSkill(skill: Skill) {
-        val result = databaseRepository.deleteSkill(skill)
+    suspend fun deleteUserSkill(userSkill: UserSkill) {
+        val result = databaseRepository.deleteUserSkill(userSkill)
 
         if (result) {
             _skillActionResult.postValue(SkillActionResult(success = true))

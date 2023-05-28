@@ -8,7 +8,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
-import ru.net2fox.quester.data.model.Skill
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.User
 
 class CharacterViewModel : ViewModel() {
@@ -25,14 +25,14 @@ class CharacterViewModel : ViewModel() {
     val characterResult: LiveData<CharacterResult> = _characterResult
 
     suspend fun getSkills() {
-        val result = databaseRepository.getSkills()
+        val result = databaseRepository.getUserSkills()
 
         if (result is Result.Success) {
             val query: QuerySnapshot = result.data;
-            val mutableSkills: MutableList<Skill> = mutableListOf()
+            val mutableUserSkills: MutableList<UserSkill> = mutableListOf()
             for (postDocument in query) {
-                mutableSkills.add(
-                    Skill(
+                mutableUserSkills.add(
+                    UserSkill(
                     postDocument.id,
                     postDocument.get("id", Long::class.java)!!,
                     postDocument.getString("name")!!,
@@ -42,7 +42,7 @@ class CharacterViewModel : ViewModel() {
                 )
                 )
             }
-            _skillResult.postValue(CharacterSkillResult(success = mutableSkills))
+            _skillResult.postValue(CharacterSkillResult(success = mutableUserSkills))
         } else {
             _skillResult.postValue(CharacterSkillResult(error = R.string.get_data_error))
         }
