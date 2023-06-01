@@ -6,15 +6,18 @@ import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 
-class UserLog (
+data class UserLog (
     @get:Exclude
     var strId: String? = null,
-    //var id: Long,
     var userRef: DocumentReference,
     @get:Exclude
     var user: User? = null,
     @get:Exclude
     var userName: String? = null,
+    @get:Exclude
+    var userId: String? = null,
+    @get: Exclude
+    var userIsBlocked: Boolean = false,
     var objectRef: DocumentReference,
     @get:Exclude
     var objectName: String? = null,

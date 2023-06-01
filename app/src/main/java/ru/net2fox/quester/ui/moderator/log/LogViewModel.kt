@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.R
@@ -15,6 +16,7 @@ import ru.net2fox.quester.data.model.Object
 import ru.net2fox.quester.data.model.UserLog
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class LogViewModel : ViewModel() {
 
@@ -25,8 +27,6 @@ class LogViewModel : ViewModel() {
 
     private var logs: List<UserLog>? = null
 
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("dd.MM.yyyy")
-    private var isFiltered: Boolean = false
     private var filterDate: Date? = null
     private var filterUsername: String? = null
     private var filterTimestamp: Timestamp? = null
@@ -43,13 +43,24 @@ class LogViewModel : ViewModel() {
             for (document in query) {
                 val userRef = document.getDocumentReference("userRef")!!
                 val objectRef = document.getDocumentReference("objectRef")!!
+                val user: DocumentSnapshot = userRef.get().await()
                 val userName = userRef.get().await().getString("name")!!
-                var objectName: String? = objectRef.get().await().getString("name")
+                val userId = userRef.get().await().id
+                val objectName: String? = if (document.get("objectType", Object::class.java)!! == Object.SKILL) {
+                    if (Locale.getDefault().language.equals(Locale("ru").language)){
+                        objectRef.get().await().getString("nameRU")
+                    } else {
+                        objectRef.get().await().getString("nameEN")
+                    }
+                } else {
+                    objectRef.get().await().getString("name")
+                }
                 val log = UserLog(
                     strId = document.id,
-                    //id = document.getLong("id")!!,
                     userRef = userRef,
                     userName = userName,
+                    userId = userId,
+                    userIsBlocked = user.getBoolean("isBlocked")!!,
                     objectRef = objectRef,
                     datetime = document.getTimestamp("datetime")!!,
                     action = document.get("action", Action::class.java)!!,
@@ -58,13 +69,18 @@ class LogViewModel : ViewModel() {
                 )
                 mutableLog.add(log)
             }
-            logs = mutableLog
+            logs = mutableLog.filter { u -> !u.userIsBlocked }
             filterUsername = null
             filterDate = null
-            _logResult.postValue(LogResult(success = mutableLog))
+            _logResult.postValue(LogResult(success = logs))
         } else {
             _logResult.postValue(LogResult(error = R.string.get_data_error))
         }
+    }
+
+    fun clearLogs() {
+        logs = null
+        _logResult.postValue(LogResult(success = logs))
     }
 
     fun filterLogsByUser(username: String?) {

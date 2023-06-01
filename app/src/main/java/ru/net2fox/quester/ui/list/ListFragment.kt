@@ -36,7 +36,7 @@ class ListFragment : Fragment() {
     private var tabTextColors: ColorStateList? = null
     private val typedValueTextColor: TypedValue = TypedValue()
 
-    // This property is only valid between onCreateView and
+    // Это свойство действует только между onCreateView и
     // onDestroyView.
     private val binding get() = _binding!!
 
@@ -58,7 +58,6 @@ class ListFragment : Fragment() {
             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val taskNameEditText: TextInputEditText? = dialogView.findViewById(R.id.editText)
                 val wantToCloseDialog: Boolean = taskNameEditText?.text.toString().trim().isEmpty()
-                // Если EditText пуст, отключите закрытие при нажатии на позитивную кнопку
                 if (!wantToCloseDialog) {
                     alertDialog.dismiss()
                     val listId = listViewModel.getListId(binding.tabs.selectedTabPosition)
@@ -79,22 +78,13 @@ class ListFragment : Fragment() {
 
         listViewModel = ViewModelProvider(  this, ListViewModelFactory())[ListViewModel::class.java]
 
-        // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()
-
-        // Add menu items without using the Fragment Menu APIs
-        // Note how we can tie the MenuProvider to the viewLifecycleOwner
-        // and an optional Lifecycle.State (here, RESUMED) to indicate when
-        // the menu should be visible
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                // Add menu items here
                 menuInflater.inflate(R.menu.menu_list, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                // Handle the menu selection
-                //return true
                 return when (menuItem.itemId) {
                     R.id.action_edit_list -> {
                         changeListNameMaterialAlertDialog()
@@ -114,7 +104,6 @@ class ListFragment : Fragment() {
                     menu.findItem(R.id.action_edit_list).isVisible = false
                     menu.findItem(R.id.action_delete_list).isVisible = false
                 }
-
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
@@ -206,7 +195,6 @@ class ListFragment : Fragment() {
                             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                                 val listNameEditText: TextInputEditText? = dialogView.findViewById(R.id.editText)
                                 val wantToCloseDialog: Boolean = listNameEditText?.text.toString().trim().isEmpty()
-                                // Если EditText пуст, отключите закрытие при нажатии на позитивную кнопку
                                 if (!wantToCloseDialog) {
                                     alertDialog.dismiss()
                                     lifecycleScope.launch(Dispatchers.IO) {
@@ -242,9 +230,7 @@ class ListFragment : Fragment() {
         listNameEditText!!.setText(listViewModel.getListById(listId!!)?.name!!)
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            //val listNameEditText: TextInputEditText? = dialogView.findViewById(R.id.editText)
             val wantToCloseDialog: Boolean = listNameEditText.text.toString().trim().isEmpty()
-            // Если EditText пуст, отключите закрытие при нажатии на позитивную кнопку
             if (!wantToCloseDialog) {
                 alertDialog.dismiss()
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -273,10 +259,5 @@ class ListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(KEY_SELECTED_TAB_INDEX, binding.tabs.selectedTabPosition)
     }
 }

@@ -106,5 +106,19 @@
     <string name="user_profile_fragment_label">User profile</string>
     <string name="user_profile_menu_item">Profile</string>
     <string name="add_skill_dialog_title">Select the skill you want to add</string>
+    <string name="appbar_menu_block_profile">Block</string>
+    <string name="text_achievements">Achievements</string>
+    <string name="button_text_all_achievements">All achievements</string>
+    <string name="add_skill_hint">Skill</string>
+    <string name="error_add_skill">You already have this skill!</string>
+    <string name="task_complete">Task complete</string>
+    <string name="button_text_add_skill">Add skill</string>
+    <string name="text_difficulty">Difficulty</string>
+    <string name="text_user_blocked">User is blocked</string>
+    <string name="confirm_title">Confirmation</string>
+    <string name="block_user_dialog_text">Are you sure you want to block this user?</string>
+    <string name="sign_in_failed_account_blocked">Your account has been blocked</string>
+    <string name="blocked_user_dialog_text">Your account has been blocked</string>
+    <string name="blocked_title">Blocking</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

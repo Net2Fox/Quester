@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 /**
- * Фабрика провайдера ViewModel для инстанцирования ListViewModel.
- * Требуется, чтобы у данной ListViewModel был непустой конструктор.
+ * Фабрика провайдера ViewModel для инстанцирования TaskViewModel.
+ * Требуется, чтобы у данной TaskViewModel был непустой конструктор.
  */
 class TaskViewModelFactory : ViewModelProvider.Factory {
 

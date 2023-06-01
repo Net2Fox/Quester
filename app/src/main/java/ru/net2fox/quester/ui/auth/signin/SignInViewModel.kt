@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.auth.AuthRepository
+import ru.net2fox.quester.data.model.FirebaseBlockedAccountException
 import ru.net2fox.quester.data.model.FirebaseDeletedAccountException
 
 class SignInViewModel : ViewModel() {
@@ -45,6 +46,10 @@ class SignInViewModel : ViewModel() {
                     // Обработка ошибки удалённого аккаунта
                     _signInResult.postValue(SignInResult(error = R.string.sign_in_failed_account_deleted))
                 }
+                is FirebaseBlockedAccountException -> {
+                    // Обработка ошибки заблокированного аккаунта
+                    _signInResult.postValue(SignInResult(error = R.string.sign_in_failed_account_blocked))
+                }
                 else -> {
                     // Общая обработка ошибки
                     _signInResult.postValue(SignInResult(error = R.string.sign_in_failed))
@@ -63,12 +68,12 @@ class SignInViewModel : ViewModel() {
         }
     }
 
-    // A placeholder username validation check
+    // Проверка адреса почты
     private fun isEmailValid(username: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(username).matches()
     }
 
-    // A placeholder password validation check
+    // Проверка пароля
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }

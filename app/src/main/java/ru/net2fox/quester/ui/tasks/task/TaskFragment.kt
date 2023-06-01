@@ -33,7 +33,7 @@ class TaskFragment : Fragment() {
     private var _binding: FragmentTaskBinding? = null
     private lateinit var adapter: TaskRecyclerViewAdapter
 
-    // This property is only valid between onCreateView and
+    // Это свойство действует только между onCreateView и
     // onDestroyView.
     private val binding get() = _binding!!
 
@@ -122,7 +122,6 @@ class TaskFragment : Fragment() {
         }
 
         override fun onClick(v: View) {
-            //TODO Переделать тап по элементам
             if (v is CheckBox) {
                 task.isExecuted = checkBoxView.isChecked
                 lifecycleScope.launch(Dispatchers.IO) {

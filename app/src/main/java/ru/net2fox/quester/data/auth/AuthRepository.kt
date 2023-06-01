@@ -10,6 +10,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
+import ru.net2fox.quester.data.model.FirebaseBlockedAccountException
 import ru.net2fox.quester.data.model.FirebaseDeletedAccountException
 
 /**
@@ -22,7 +23,6 @@ class AuthRepository {
     private val databaseRepository = DatabaseRepository.get()
     private val db = Firebase.firestore
 
-    // Реализация функции для регистрации нового пользователя по электронной почте и паролю
     suspend fun signUp(username: String, email: String, password: String): Result<AuthResult> {
         return try {
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -38,12 +38,17 @@ class AuthRepository {
         }
     }
 
-    // Реализация функции для входа существующего пользователя по электронной почте и паролю
     suspend fun signIn(email: String, password: String): Result<AuthResult> {
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             if (db.collection("users").document(authResult.user!!.uid).get().await().getBoolean("isDeleted") == true) {
+                firebaseAuth.signOut()
                 throw FirebaseDeletedAccountException("Your account has been deleted")
+
+            }
+            if (isBlocked()) {
+                firebaseAuth.signOut()
+                throw FirebaseBlockedAccountException("Your account has been blocked")
             }
             databaseRepository.initializeUser()
             Result.Success(authResult)
@@ -58,11 +63,15 @@ class AuthRepository {
         return result.getBoolean("isModerator")!!
     }
 
+    suspend fun isBlocked(): Boolean {
+        val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
+        return result.getBoolean("isBlocked")!!
+    }
+
     fun signOut() {
         firebaseAuth.signOut()
     }
 
-    // Реализация функции для получения текущего пользователя
     fun getCurrentUser(): FirebaseUser? {
         return firebaseAuth.currentUser
     }

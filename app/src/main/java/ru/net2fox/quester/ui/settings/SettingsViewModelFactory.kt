@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 
 /**
  * Фабрика провайдера ViewModel для инстанцирования SettingsViewModel.
- * Требуется, чтобы у данной ListViewModel был непустой конструктор.
+ * Требуется, чтобы у данной SettingsViewModel был непустой конструктор.
  */
 class SettingsViewModelFactory  : ViewModelProvider.Factory {
 

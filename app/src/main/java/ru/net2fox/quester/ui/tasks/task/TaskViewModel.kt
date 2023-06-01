@@ -41,7 +41,8 @@ class TaskViewModel : ViewModel() {
                             UserSkill(
                                 strId = skillDocument.id,
                                 id = skillDocument.get("id", Long::class.java)!!,
-                                name = skillDocument.getString("name")!!,
+                                nameRU = skillDocument.getString("nameRU")!!,
+                                nameEN = skillDocument.getString("nameEN")!!,
                                 experience = skillDocument.get("experience", Int::class.java)!!,
                                 level = skillDocument.get("level", Int::class.java)!!
                             )

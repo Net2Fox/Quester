@@ -16,10 +16,12 @@ import ru.net2fox.quester.data.model.Action
 import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.TaskList
 import ru.net2fox.quester.data.model.Object
+import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.data.model.UserLog
+import java.util.Locale
 
 /**
  * Класс, который запрашивает информацию из удаленного источника данных
@@ -27,18 +29,11 @@ import ru.net2fox.quester.data.model.UserLog
  */
 class DatabaseRepository {
 
-    //TODO Переписать всю часть получения данных, сделать кеширование, подробнее смотри в ChatGPT "Clean architecture и MVVM"
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
 
-    // Кеширование
     private lateinit var user: FirebaseUser
     private lateinit var userReference: DocumentReference
-
-    private lateinit var currentUser: User
-    private lateinit var userTaskLists: TaskList
-    private lateinit var userSkills: UserSkill
-    private lateinit var moderatorLogs: UserLog
 
     private var skillLastId: Long = 0
     private var listLastId: Long = 0
@@ -125,6 +120,18 @@ class DatabaseRepository {
         return try {
             val result = db.collection("users")
                 .document(user.uid)
+                .get()
+                .await()
+            Result.Success(result)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getUserById(userId: String): Result<DocumentSnapshot>  {
+        return try {
+            val result = db.collection("users")
+                .document(userId)
                 .get()
                 .await()
             Result.Success(result)
@@ -462,7 +469,13 @@ class DatabaseRepository {
     suspend fun getSkills(): Result<QuerySnapshot> {
         return try {
             val result = db.collection("skills")
-                .orderBy("name")
+                .orderBy(
+                    if (Locale.getDefault().language.equals(Locale("ru").language)) {
+                        "nameRU"
+                    } else {
+                        "nameEN"
+                    }
+                )
                 .get()
                 .await()
             Result.Success(result)
@@ -475,6 +488,21 @@ class DatabaseRepository {
         return try {
             val result = db.collection("users")
                 .document(user.uid)
+                .collection("skills")
+                .whereEqualTo("isDeleted", false)
+                .orderBy("id")
+                .get()
+                .await()
+            Result.Success(result)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun getUserSkillsById(userId: String): Result<QuerySnapshot> {
+        return try {
+            val result = db.collection("users")
+                .document(userId)
                 .collection("skills")
                 .whereEqualTo("isDeleted", false)
                 .orderBy("id")
@@ -500,8 +528,7 @@ class DatabaseRepository {
         }
     }
 
-    // TODO Переделать на добавление скилла
-    suspend fun createSkill(skillName: String): Result<DocumentReference> {
+    suspend fun addSkill(skill: Skill): Boolean {
         return try {
             val result = db.collection("users")
                 .document(user.uid)
@@ -509,15 +536,16 @@ class DatabaseRepository {
                 .add(
                     UserSkill(
                         id = skillLastId,
-                        name = skillName
+                        nameRU = skill.nameRU,
+                        nameEN = skill.nameEN
                     )
                 )
                 .await()
             addId("skills")
             writeLog(result, Action.CREATE, Object.SKILL)
-            Result.Success(result)
+            true
         } catch (e: Exception) {
-            Result.Error(e)
+            false
         }
     }
 

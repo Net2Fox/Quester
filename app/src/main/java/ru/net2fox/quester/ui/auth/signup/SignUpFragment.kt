@@ -24,7 +24,8 @@ class SignUpFragment : Fragment() {
     private lateinit var signUpViewModel: SignUpViewModel
     private var _binding: FragmentSignUpBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
+    // Это свойство действует только между onCreateView и
+    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -32,15 +33,12 @@ class SignUpFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         signUpViewModel = ViewModelProvider(this, SignUpViewModelFactory())[SignUpViewModel::class.java]
 
         val usernameEditText = binding.username
@@ -57,10 +55,8 @@ class SignUpFragment : Fragment() {
                 }
                 signUpButton.isEnabled = loginFormState.isDataValid
                 loginFormState.usernameError?.let {
-                    //usernameEditText.error = getString(it)
                 }
                 loginFormState.passwordError?.let {
-                    //passwordEditText.error = getString(it)
                 }
             })
 
@@ -78,11 +74,11 @@ class SignUpFragment : Fragment() {
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // ignore
+                // Игнорируем
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // ignore
+                // Игнорируем
             }
 
             override fun afterTextChanged(s: Editable) {

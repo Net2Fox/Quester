@@ -28,7 +28,7 @@ class LeaderboardFragment : Fragment() {
     private var _binding: FragmentLeaderboardBinding? = null
     private lateinit var adapter: UsersRecyclerViewAdapter
 
-    // This property is only valid between onCreateView and
+    // Это свойство действует только между onCreateView и
     // onDestroyView.
     private val binding get() = _binding!!
 

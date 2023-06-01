@@ -89,4 +89,18 @@
     <string name="user_profile_fragment_label">Профиль пользователя</string>
     <string name="user_profile_menu_item">Профиль</string>
     <string name="add_skill_dialog_title">Выберите навык, который хотите добавить</string>
+    <string name="appbar_menu_block_profile">Заблокировать</string>
+    <string name="text_achievements">Достижения</string>
+    <string name="button_text_all_achievements">Все достижения</string>
+    <string name="add_skill_hint">Навык</string>
+    <string name="error_add_skill">У вас уже есть этот навык!</string>
+    <string name="task_complete">Задача выполнена</string>
+    <string name="button_text_add_skill">Добавить навык</string>
+    <string name="text_difficulty">Сложность</string>
+    <string name="text_user_blocked">Пользователь заблокирован</string>
+    <string name="confirm_title">Подтверждение</string>
+    <string name="block_user_dialog_text">Вы точно хотите заблокировать данного пользователя?</string>
+    <string name="sign_in_failed_account_blocked">Ваш аккаунт был заблокирован</string>
+    <string name="blocked_user_dialog_text">Ваш аккаунт был заблокирован</string>
+    <string name="blocked_title">Блокировка</string>
 </resources>

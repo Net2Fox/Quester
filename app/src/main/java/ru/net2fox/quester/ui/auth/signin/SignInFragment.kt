@@ -26,7 +26,7 @@ class SignInFragment : Fragment() {
     private lateinit var signInViewModel: SignInViewModel
     private var _binding: FragmentSignInBinding? = null
 
-    // This property is only valid between onCreateView and
+    // Это свойство действует только между onCreateView и
     // onDestroyView.
     private val binding get() = _binding!!
 
@@ -56,10 +56,8 @@ class SignInFragment : Fragment() {
                 loginFormState ?: return@Observer
                 signInButton.isEnabled = loginFormState.isDataValid
                 loginFormState.usernameError?.let {
-                    //usernameEditText.error = getString(it)
                 }
                 loginFormState.passwordError?.let {
-                    //passwordEditText.error = getString(it)
                 }
             })
 
@@ -77,11 +75,11 @@ class SignInFragment : Fragment() {
 
         val afterTextChangedListener = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // ignore
+                // Игнорируем
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // ignore
+                // Игнорируем
             }
 
             override fun afterTextChanged(s: Editable) {

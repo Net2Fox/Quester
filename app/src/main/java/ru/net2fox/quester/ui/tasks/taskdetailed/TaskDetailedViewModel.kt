@@ -13,8 +13,9 @@ import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
-import ru.net2fox.quester.ui.character.CharacterSkillResult
 import ru.net2fox.quester.ui.tasks.TaskActionResult
+import ru.net2fox.quester.ui.userprofile.UserProfileResult
+import ru.net2fox.quester.ui.userprofile.UserSkillResult
 
 class TaskDetailedViewModel : ViewModel() {
 
@@ -40,7 +41,8 @@ class TaskDetailedViewModel : ViewModel() {
                     userSkills.add(UserSkill(
                         strId = skillDocument.id,
                         id = skillDocument.get("id", Long::class.java)!!,
-                        name = skillDocument.getString("name")!!,
+                        nameRU = skillDocument.getString("nameRU")!!,
+                        nameEN = skillDocument.getString("nameEN")!!,
                         experience = skillDocument.get("experience", Int::class.java)!!,
                         level = skillDocument.get("level", Int::class.java)!!
                     ))
@@ -119,8 +121,8 @@ class TaskDetailedViewModel : ViewModel() {
         }
     }
 
-    private val _skillsResult = MutableLiveData<CharacterSkillResult>()
-    val skillsResult: LiveData<CharacterSkillResult> = _skillsResult
+    private val _skillsResult = MutableLiveData<UserSkillResult>()
+    val skillsResult: LiveData<UserSkillResult> = _skillsResult
 
     private val _skillsRef: MutableList<DocumentReference> = mutableListOf()
 
@@ -138,16 +140,17 @@ class TaskDetailedViewModel : ViewModel() {
                     UserSkill(
                         postDocument.id,
                         postDocument.get("id", Long::class.java)!!,
-                        postDocument.getString("name")!!,
+                        postDocument.getString("nameRU")!!,
+                        postDocument.getString("nameEN")!!,
                         postDocument.get("experience", Int::class.java)!!,
                         postDocument.get("needExperience", Int::class.java)!!,
                         postDocument.get("level", Int::class.java)!!
                     )
                 )
             }
-            _skillsResult.postValue(CharacterSkillResult(success = mutableUserSkills))
+            _skillsResult.postValue(UserSkillResult(success = mutableUserSkills))
         } else {
-            _skillsResult.postValue(CharacterSkillResult(error = R.string.get_data_error))
+            _skillsResult.postValue(UserSkillResult(error = R.string.get_data_error))
         }
     }
 

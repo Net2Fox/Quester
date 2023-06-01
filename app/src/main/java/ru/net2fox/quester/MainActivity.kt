@@ -19,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var defaultNavBarColor: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNavigation.setupWithNavController(navController)
-        val defaultNavBarColor = window.navigationBarColor
+        defaultNavBarColor = window.navigationBarColor
         // Установка цвета системной панели навигации
         window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
 
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener {_, destination, _ ->
             if (destination.id in hideBottomNavDestinations) {
                 binding.bottomNavigation.visibility = View.GONE
-                window.navigationBarColor = defaultNavBarColor
+                window.navigationBarColor = defaultNavBarColor!!
             } else {
                 binding.bottomNavigation.visibility = View.VISIBLE
                 window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
@@ -132,21 +134,42 @@ class MainActivity : AppCompatActivity() {
         })
 
         checkInternet()
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToSignInFragment())
-        } else {
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (AuthRepository.get().isModerator()) {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToLogFragment())
+        if (navController.currentDestination?.id == R.id.placeholderFragment) {
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToSignInFragment())
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (!AuthRepository.get().isBlocked()) {
+                        if (AuthRepository.get().isModerator()) {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToLogFragment())
+                            }
+                        } else {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToUserProfileFragment())
+                            }
+                        }
+                    } else {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            blockedUserMaterialAlertDialog()
+                            AuthRepository.get().signOut()
+                            navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToSignInFragment())
+                        }
                     }
-                } else {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        navController.navigate(PlaceholderFragmentDirections.actionPlaceholderFragmentToUserProfileFragment())
-                    }
+
                 }
             }
         }
+    }
+
+    private fun blockedUserMaterialAlertDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.blocked_title)
+            .setMessage(R.string.blocked_user_dialog_text)
+            .setPositiveButton(resources.getString(R.string.ok_dialog_button)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun checkInternet() {
@@ -157,13 +180,13 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
-            // network is available for use
+            // Сеть доступна
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
                 gotConnection()
             }
 
-            // lost network connection
+            // Потеря соединения
             override fun onLost(network: Network) {
                 super.onLost(network)
                 lostConnection()
@@ -207,5 +230,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    fun setDefaultNavBarColor() {
+        window.navigationBarColor = defaultNavBarColor!!
     }
 }

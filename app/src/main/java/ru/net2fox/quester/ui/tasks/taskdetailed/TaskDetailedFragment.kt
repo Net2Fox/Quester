@@ -28,6 +28,7 @@ import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.Task
 import ru.net2fox.quester.databinding.FragmentTaskDetailedBinding
+import java.util.Locale
 
 private const val KEY_TASK_ID = "ru.net2fox.quester.ui.task.TASK_ID"
 
@@ -41,7 +42,7 @@ class TaskDetailedFragment : Fragment() {
     private lateinit var taskDetailedViewModel: TaskDetailedViewModel
     private lateinit var adapterRecyclerView: SkillRecyclerViewAdapter
 
-    // This property is only valid between onCreateView and
+    // Это свойство действует только между onCreateView и
     // onDestroyView.
     private val binding get() = _binding!!
 
@@ -60,21 +61,13 @@ class TaskDetailedFragment : Fragment() {
         adapterRecyclerView = SkillRecyclerViewAdapter(taskDetailedViewModel)
         binding.recyclerViewSkills.adapter = adapterRecyclerView
 
-        // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()
-        // Add menu items without using the Fragment Menu APIs
-        // Note how we can tie the MenuProvider to the viewLifecycleOwner
-        // and an optional Lifecycle.State (here, RESUMED) to indicate when
-        // the menu should be visible
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                // Add menu items here
                 menuInflater.inflate(R.menu.menu_task_detailed, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                // Handle the menu selection
-                //return true
                 return when (menuItem.itemId) {
                     R.id.action_delete_task -> {
                         deleteTaskMaterialAlertDialog()
@@ -150,7 +143,7 @@ class TaskDetailedFragment : Fragment() {
             }
         }
 
-        binding.autoComplete.setOnItemClickListener { parent, view, position, id ->
+        binding.autoComplete.setOnItemClickListener { parent, _, position, _ ->
             val item = parent.getItemAtPosition(position)
             if (item is Difficulty) {
                 currnetTask.difficulty = item
@@ -165,9 +158,9 @@ class TaskDetailedFragment : Fragment() {
         binding.editTextDescription.setText(task.description)
         binding.autoComplete.setText(difficultyArrayAdapter.getItem(difficultyArrayAdapter.getPosition(task.difficulty)).toString(), false)
         if (task.isExecuted) {
-            binding.extendedFab.text = "Задача не выполнена"
+            binding.extendedFab.visibility = View.GONE
         } else {
-            binding.extendedFab.text = "Задача выполнена"
+            binding.extendedFab.text = getString(R.string.task_complete)
         }
     }
 
@@ -203,7 +196,6 @@ class TaskDetailedFragment : Fragment() {
         val alertDialog: AlertDialog = builder.create()
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            // Если selectedSkill пуст, отключите закрытие при нажатии на позитивную кнопку
             if (selectedUserSkill != null) {
                 alertDialog.dismiss()
                 addTaskSkill(selectedUserSkill!!)
@@ -240,7 +232,11 @@ class TaskDetailedFragment : Fragment() {
 
         fun bind(userSkill: UserSkill) {
             this.userSkill = userSkill
-            skillNameTextView.text = userSkill.name
+            skillNameTextView.text = if (Locale.getDefault().language.equals(Locale("ru").language)) {
+                userSkill.nameRU
+            } else {
+                userSkill.nameEN
+            }
         }
     }
 
@@ -264,14 +260,6 @@ class TaskDetailedFragment : Fragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @return A new instance of fragment TaskDetailedFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String) =
             TaskDetailedFragment().apply {

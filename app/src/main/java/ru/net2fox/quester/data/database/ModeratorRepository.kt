@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -17,7 +18,6 @@ import java.util.Date
  */
 class ModeratorRepository {
 
-    //TODO Сделать кеширование, подробнее смотри в ChatGPT "Clean architecture и MVVM"
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
 
@@ -55,6 +55,22 @@ class ModeratorRepository {
             Log.d("Firebase", e.message.toString())
             Result.Error(e)
         }
+    }
+
+    suspend fun blockUser(userId: String): Boolean {
+        return try{
+            val changes = hashMapOf(
+                "isBlocked" to true
+            )
+            db.collection("users")
+                .document(userId)
+                .set(changes, SetOptions.merge())
+                .await()
+            true
+        } catch (_: Exception) {
+            false
+        }
+
     }
 
     companion object {

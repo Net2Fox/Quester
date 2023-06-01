@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +35,6 @@ import ru.net2fox.quester.data.model.UserLog
 import ru.net2fox.quester.databinding.FragmentLogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.TimeZone
 
 class LogFragment : Fragment() {
 
@@ -73,18 +73,10 @@ class LogFragment : Fragment() {
                 }
             }
         )
-        //val standardBottomSheetBehavior = BottomSheetBehavior.from(binding.standardBottomSheet)
 
-        // The usage of an interface lets you inject your own implementation
         val menuHost: MenuHost = requireActivity()
-
-        // Add menu items without using the Fragment Menu APIs
-        // Note how we can tie the MenuProvider to the viewLifecycleOwner
-        // and an optional Lifecycle.State (here, RESUMED) to indicate when
-        // the menu should be visible
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                // Add menu items here
                 menuInflater.inflate(R.menu.menu_log, menu)
                 val searchItem = menu.findItem(R.id.action_search)
                 val searchView = searchItem?.actionView as SearchView
@@ -99,7 +91,6 @@ class LogFragment : Fragment() {
                     }
 
                     override fun onQueryTextChange(newText: String): Boolean {
-
                         return false
                     }
                 })
@@ -130,6 +121,11 @@ class LogFragment : Fragment() {
             }
         }
 
+        updateData()
+    }
+
+    override fun onResume() {
+        super.onResume()
         updateData()
     }
 
@@ -193,11 +189,11 @@ class LogFragment : Fragment() {
                 dateFormat.format(date),
                 timeFormat.format(date)
             )
-            textView.startAnimation(AnimationUtils.loadAnimation(itemView.context, R.anim.recyclerview_item_anim))
         }
 
         override fun onClick(v: View) {
-
+            val action = LogFragmentDirections.actionLogFragmentToUserProfileFragment(log.userId, true)
+            findNavController().navigate(action)
         }
     }
 

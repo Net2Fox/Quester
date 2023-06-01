@@ -2,8 +2,10 @@ package ru.net2fox.quester.ui.userprofile
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -12,22 +14,30 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ru.net2fox.quester.MainActivity
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.Skill
-import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.User
+import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.databinding.FragmentUserProfileBinding
-import ru.net2fox.quester.ui.character.CharacterFragmentDirections
+import java.util.Locale
+
 
 class UserProfileFragment : Fragment() {
 
@@ -38,6 +48,7 @@ class UserProfileFragment : Fragment() {
     private lateinit var userSkills: List<UserSkill>
     private lateinit var skills: List<Skill>
     private lateinit var skillAdapter: SkillRecyclerViewAdapter
+    private val args: UserProfileFragmentArgs by navArgs()
 
     private val binding get() = _binding!!
 
@@ -66,7 +77,7 @@ class UserProfileFragment : Fragment() {
             Observer { user ->
                 user?.let { userResult ->
                     userResult.error?.let {
-                        showToastFail(it)
+                        showToast(it)
                     }
                     userResult.success?.let {
                         this.currentUser = it
@@ -82,7 +93,7 @@ class UserProfileFragment : Fragment() {
             Observer { userSkills ->
                 userSkills?.let { skillResult ->
                     skillResult.error?.let {
-                        showToastFail(it)
+                        showToast(it)
                     }
                     skillResult.success?.let {
                         this.userSkills = it
@@ -97,7 +108,7 @@ class UserProfileFragment : Fragment() {
             Observer { skills ->
                 skills?.let { skillResult ->
                     skillResult.error?.let {
-                        showToastFail(it)
+                        showToast(it)
                     }
                     skillResult.success?.let {
                         this.skills = it
@@ -106,9 +117,30 @@ class UserProfileFragment : Fragment() {
             }
         )
 
-        binding.addSkill.setOnClickListener {
-            addSkillMaterialAlertDialog()
-        }
+        userProfileViewModel.addSkillResult.observe(
+        viewLifecycleOwner,
+        Observer { result ->
+            result?.error?.let {
+                showToast(it)
+            }
+            result?.success?.let {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    userProfileViewModel.getUserSkills()
+                }
+            }
+        })
+
+        userProfileViewModel.blockUserResult.observe(
+            viewLifecycleOwner,
+            Observer { result ->
+                if (result) {
+                    showToast(R.string.text_user_blocked)
+                    findNavController().popBackStack()
+                } else {
+                    showToast(R.string.get_data_error)
+                }
+            }
+        )
 
         binding.swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch(Dispatchers.IO) {
@@ -118,11 +150,30 @@ class UserProfileFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            binding.swipeRefresh.isRefreshing = true
-            userProfileViewModel.getUserSkills()
-            userProfileViewModel.getUser()
-            userProfileViewModel.getSkills()
+        if(args.userId == null) {
+            binding.addSkill.setOnClickListener {
+                addSkillMaterialAlertDialog()
+            }
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                binding.swipeRefresh.isRefreshing = true
+                userProfileViewModel.getUserSkills()
+                userProfileViewModel.getUser()
+                userProfileViewModel.getSkills()
+            }
+        } else {
+            binding.addSkill.visibility = View.GONE
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation).visibility = View.GONE
+            (requireActivity() as MainActivity).setDefaultNavBarColor()
+            lifecycleScope.launch(Dispatchers.IO) {
+                binding.swipeRefresh.isRefreshing = true
+                userProfileViewModel.getUserSkills()
+                userProfileViewModel.getUser()
+            }
+        }
+
+        if (args.isModerator) {
+            updateModeratorUI()
         }
     }
 
@@ -144,13 +195,45 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private fun showToastFail(@StringRes errorString: Int) {
+    private fun blockConfirmMaterialAlertDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.confirm_title)
+            .setMessage(R.string.block_user_dialog_text)
+            .setNegativeButton(R.string.cancel_dialog_button, null)
+            .setPositiveButton(resources.getString(R.string.ok_dialog_button)) { dialog, _ ->
+                dialog.dismiss()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    userProfileViewModel.blockUser(args.userId!!)
+                }
+            }
+            .show()
+    }
+
+    private fun updateModeratorUI() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu_profile_moderator, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_block_profile -> {
+                        blockConfirmMaterialAlertDialog()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun showToast(@StringRes string: Int) {
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, string, Toast.LENGTH_LONG).show()
     }
 
     private fun addSkillMaterialAlertDialog() {
-
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(R.string.add_skill_dialog_title)
         val dialogView: View = LayoutInflater.from(this.context).inflate(R.layout.skill_alertdialog, null, false)
@@ -158,7 +241,7 @@ class UserProfileFragment : Fragment() {
         val autoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.auto_complete)
         var selectedSkill: Skill? = null
         autoComplete.setAdapter(skillsAdapter)
-        autoComplete.setOnItemClickListener { parent, view, position, id ->
+        autoComplete.setOnItemClickListener { parent, _, position, _ ->
             val item = parent.getItemAtPosition(position)
             if (item is Skill) {
                 selectedSkill = item
@@ -170,11 +253,21 @@ class UserProfileFragment : Fragment() {
         val alertDialog: AlertDialog = builder.create()
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            // Если selectedSkill пуст, отключите закрытие при нажатии на позитивную кнопку
             if (selectedSkill != null) {
-                alertDialog.dismiss()
-                //addTaskSkill(selectedUserSkill!!)
-                //updateUI(currnetTask)
+                var userAlreadyHaveSkill = false
+                for (userSkill in userSkills) {
+                    if (userSkill.nameEN == selectedSkill!!.nameEN) {
+                        showToast(R.string.error_add_skill)
+                        userAlreadyHaveSkill = true
+                        break
+                    }
+                }
+                if (!userAlreadyHaveSkill) {
+                    alertDialog.dismiss()
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        userProfileViewModel.addSkill(selectedSkill!!)
+                    }
+                }
             }
         }
     }
@@ -236,7 +329,7 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private inner class SkillViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    private inner class SkillViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private lateinit var userSkill: UserSkill
 
@@ -245,26 +338,19 @@ class UserProfileFragment : Fragment() {
         private val skillLevelTextView: TextView = itemView.findViewById(R.id.text_view_skill_level)
         private val skillPercentTextView: TextView = itemView.findViewById(R.id.text_view_skill_percent)
 
-        init {
-            skillNameTextView.setOnClickListener(this)
-        }
 
         fun bind(userSkill: UserSkill) {
             this.userSkill = userSkill
-            skillNameTextView.text = userSkill.name
+            skillNameTextView.text = if (Locale.getDefault().language.equals(Locale("ru").language)) {
+                userSkill.nameRU
+            } else {
+                userSkill.nameEN
+            }
             progressBar.max = userSkill.needExperience
             val per: Double = ((userSkill.experience.toDouble() / userSkill.needExperience.toDouble()) * 100)
             progressBar.progress = per.toInt()
             skillLevelTextView.text = getString(R.string.level_string, userSkill.level)
             skillPercentTextView.text = getString(R.string.percent_string, per.toInt())
-        }
-
-        override fun onClick(v: View) {
-            //TODO Переделать тап по элементам
-            if (v is TextView) {
-                val action = CharacterFragmentDirections.actionCharacterFragmentToSkillFragment(userSkill.strId!!)
-                findNavController().navigate(action)
-            }
         }
     }
 

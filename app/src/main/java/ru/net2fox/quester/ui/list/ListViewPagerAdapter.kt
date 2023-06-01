@@ -7,9 +7,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
 import ru.net2fox.quester.ui.tasks.task.TaskFragment
 
-
-private const val KEY_LIST_ID = "ru.net2fox.quester.ui.task.LIST_ID"
-
 class ListViewPagerAdapter(private val fm: FragmentManager, lifecycle: Lifecycle, private val listViewModel: ListViewModel) : FragmentStateAdapter(fm, lifecycle) {
 
     private val fragmentList = mutableMapOf<String, TaskFragment>()
@@ -28,7 +25,6 @@ class ListViewPagerAdapter(private val fm: FragmentManager, lifecycle: Lifecycle
         position: Int,
         payloads: MutableList<Any>
     ) {
-        //super.onBindViewHolder(holder, position, payloads)
         val tag = "f" + holder.itemId
         val fragment: Fragment? = fm.findFragmentByTag(tag)
         if (fragment != null) {
