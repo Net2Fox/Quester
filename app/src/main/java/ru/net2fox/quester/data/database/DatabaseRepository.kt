@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
@@ -12,6 +13,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.data.Result
+import ru.net2fox.quester.data.model.Achievement
 import ru.net2fox.quester.data.model.Action
 import ru.net2fox.quester.data.model.Difficulty
 import ru.net2fox.quester.data.model.TaskList
@@ -34,6 +36,8 @@ class DatabaseRepository {
 
     private lateinit var user: FirebaseUser
     private lateinit var userReference: DocumentReference
+
+    private var achievements: MutableList<Achievement> = mutableListOf()
 
     private var skillLastId: Long = 0
     private var listLastId: Long = 0
@@ -357,10 +361,9 @@ class DatabaseRepository {
         }
     }
 
-    // TODO Убрать возможность снятия отметки о выполнении с задачи
     suspend fun taskMarkChange(
         task: Task,
-        isComplete: Boolean,
+        isCompeted: Boolean,
         haveChanges: Boolean = true
     ): Boolean {
         return try {
@@ -375,7 +378,7 @@ class DatabaseRepository {
                     .await()
             } else {
                 val taskMarkChange: Map<String, Boolean> = hashMapOf(
-                    "isExecuted" to isComplete
+                    "isExecuted" to isCompeted
                 )
                 db.collection("users")
                     .document(user.uid)
@@ -392,12 +395,13 @@ class DatabaseRepository {
                 for (skillRef in task.skills!!) {
                     // Добавление опыта навыку
                     val skill = skillRef.get().await()
-                    skillChange = if ((skill.get(
+                    var skillChange: Map<String, Int>
+                    if ((skill.get(
                             "experience",
                             Int::class.java
                         )!! + task.difficulty.addExp) >= skill.get("needExperience", Int::class.java)!!
                     ) {
-                        hashMapOf(
+                        skillChange = hashMapOf(
                             "level" to skill.get("level", Int::class.java)!! + 1,
                             "experience" to (skill.get(
                                 "experience",
@@ -405,9 +409,19 @@ class DatabaseRepository {
                             )!! + task.difficulty.addExp) - 100,
                             "needExperience" to skill.get("needExperience", Int::class.java)!! * 2
                         )
-
+                        val skillReference = skill.getDocumentReference("skillRef")
+                        val skillLevel: Long = skill.get("level", Long::class.java)!! + 1
+                        val achievement = achievements.find { a -> a.skillRef == skillReference && a.skillLevel == skillLevel}
+                        if (achievement != null) {
+                            db.collection("users")
+                                .document(user.uid)
+                                .update("achievementsRefs", FieldValue.arrayUnion(
+                                    db.collection("achievements").document(achievement.id!!))
+                                )
+                                .await()
+                        }
                     } else {
-                        hashMapOf(
+                        skillChange = hashMapOf(
                             "experience" to skill.get("experience", Int::class.java)!! + task.difficulty.addExp
                         )
                     }
@@ -463,6 +477,31 @@ class DatabaseRepository {
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun getAchievements(){
+        try {
+            val result = db.collection("achievements")
+                .orderBy(
+                    if (Locale.getDefault().language.equals(Locale("ru").language)) {
+                        "nameRU"
+                    } else {
+                        "nameEN"
+                    }
+                )
+                .get()
+                .await()
+            for (document in result.documents) {
+                achievements.add(Achievement(
+                    document.id,
+                    document.getString("nameRU")!!,
+                    document.getString("nameEN")!!,
+                    document.getLong("skillLevel")!!,
+                    document.getDocumentReference("skillRef")!!
+                ))
+            }
+        } catch (_: Exception) {
         }
     }
 
@@ -537,7 +576,8 @@ class DatabaseRepository {
                     UserSkill(
                         id = skillLastId,
                         nameRU = skill.nameRU,
-                        nameEN = skill.nameEN
+                        nameEN = skill.nameEN,
+                        skillRef = db.collection("skills").document(skill.id)
                     )
                 )
                 .await()

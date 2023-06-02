@@ -120,5 +120,6 @@
     <string name="sign_in_failed_account_blocked">Your account has been blocked</string>
     <string name="blocked_user_dialog_text">Your account has been blocked</string>
     <string name="blocked_title">Blocking</string>
+    <string name="achievement_description_string">Upgrade the \"%1$s\" skill to level %2$d</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

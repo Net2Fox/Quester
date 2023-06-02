@@ -1,5 +1,6 @@
 package ru.net2fox.quester.data.model
 
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
 
 data class User(
@@ -16,6 +17,8 @@ data class User(
     var skillsCount: Long = -1,
     var tasksCount: Long = -1,
     @get:Exclude
-    var userSkills: MutableList<UserSkill>? = null
-
+    var userSkills: MutableList<UserSkill>? = null,
+    var achievementsRefs: MutableList<DocumentReference>? = mutableListOf(),
+    @get:Exclude
+    var achievements: MutableList<Achievement>? = null
 )

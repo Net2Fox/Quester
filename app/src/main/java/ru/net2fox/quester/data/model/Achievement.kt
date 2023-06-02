@@ -4,18 +4,15 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
 import java.util.Locale
 
-data class UserSkill(
+data class Achievement(
     @get:Exclude
-    var strId: String? = null,
-    var id: Long,
+    var id: String? = null,
     var nameRU: String,
     var nameEN: String,
-    var experience: Int = 0,
-    var needExperience: Int = 100,
-    var level: Int = 0,
-    var skillRef: DocumentReference? = null,
-    @field:JvmField
-    var isDeleted: Boolean = false,
+    var skillLevel: Long,
+    val skillRef: DocumentReference? = null,
+    @get:Exclude
+    var skill: Skill? = null
 ) {
     override fun toString(): String {
         return if (Locale.getDefault().language.equals(Locale("ru").language)) {

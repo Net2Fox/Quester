@@ -103,4 +103,5 @@
     <string name="sign_in_failed_account_blocked">Ваш аккаунт был заблокирован</string>
     <string name="blocked_user_dialog_text">Ваш аккаунт был заблокирован</string>
     <string name="blocked_title">Блокировка</string>
+    <string name="achievement_description_string">Прокачайте навык \"%1$s\" до %2$d уровня</string>
 </resources>

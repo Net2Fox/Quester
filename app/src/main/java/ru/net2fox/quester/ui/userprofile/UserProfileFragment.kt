@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.MainActivity
 import ru.net2fox.quester.R
+import ru.net2fox.quester.data.model.Achievement
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.data.model.UserSkill
@@ -42,10 +43,11 @@ import java.util.Locale
 class UserProfileFragment : Fragment() {
 
     private var _binding: FragmentUserProfileBinding? = null
-    private lateinit var adapter: AchievementRecyclerViewAdapter
+    private lateinit var achievementAdapter: AchievementRecyclerViewAdapter
     private lateinit var userProfileViewModel: UserProfileViewModel
     private lateinit var currentUser: User
     private lateinit var userSkills: List<UserSkill>
+    private var achievements: List<Achievement> = listOf()
     private lateinit var skills: List<Skill>
     private lateinit var skillAdapter: SkillRecyclerViewAdapter
     private val args: UserProfileFragmentArgs by navArgs()
@@ -65,8 +67,8 @@ class UserProfileFragment : Fragment() {
         userProfileViewModel = ViewModelProvider(this)[UserProfileViewModel::class.java]
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerViewAchievements.layoutManager = layoutManager
-        adapter = AchievementRecyclerViewAdapter()
-        binding.recyclerViewAchievements.adapter = adapter
+        achievementAdapter = AchievementRecyclerViewAdapter(achievements)
+        binding.recyclerViewAchievements.adapter = achievementAdapter
 
         binding.recyclerViewSkills.layoutManager = LinearLayoutManager(context)
         skillAdapter = SkillRecyclerViewAdapter(userProfileViewModel)
@@ -81,6 +83,10 @@ class UserProfileFragment : Fragment() {
                     }
                     userResult.success?.let {
                         this.currentUser = it
+                        if (it.achievements != null) {
+                            this.achievements = it.achievements!!
+                            achievementAdapter.updateAchievements(achievements)
+                        }
                         updateUI()
                         updateCharacterUI()
                     }
@@ -144,12 +150,18 @@ class UserProfileFragment : Fragment() {
 
         binding.swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch(Dispatchers.IO) {
-                userProfileViewModel.getUserSkills()
-                userProfileViewModel.getUser()
-                userProfileViewModel.getSkills()
+                updateData()
             }
         }
 
+        updateData()
+
+        if (args.isModerator) {
+            updateModeratorUI()
+        }
+    }
+
+    private fun updateData() {
         if(args.userId == null) {
             binding.addSkill.setOnClickListener {
                 addSkillMaterialAlertDialog()
@@ -167,13 +179,9 @@ class UserProfileFragment : Fragment() {
             (requireActivity() as MainActivity).setDefaultNavBarColor()
             lifecycleScope.launch(Dispatchers.IO) {
                 binding.swipeRefresh.isRefreshing = true
-                userProfileViewModel.getUserSkills()
-                userProfileViewModel.getUser()
+                userProfileViewModel.getUserSkills(args.userId)
+                userProfileViewModel.getUser(args.userId)
             }
-        }
-
-        if (args.isModerator) {
-            updateModeratorUI()
         }
     }
 
@@ -181,13 +189,13 @@ class UserProfileFragment : Fragment() {
     private fun updateUI() {
         binding.recyclerViewAchievements.adapter!!.notifyDataSetChanged()
         binding.recyclerViewSkills.adapter!!.notifyDataSetChanged()
+        binding.recyclerViewAchievements.adapter!!.notifyDataSetChanged()
         binding.swipeRefresh.isRefreshing = false
     }
 
     private fun updateCharacterUI() {
         if (::currentUser.isInitialized) {
             binding.textViewUserName.text = currentUser.name
-            binding.progressIndicator.max = 1000
             val per: Double = ((currentUser.experience.toDouble() / 1000) * 100)
             binding.progressIndicator.progress = per.toInt()
             binding.textViewUserLevel.text = getString(R.string.level_string, currentUser.level)
@@ -277,39 +285,21 @@ class UserProfileFragment : Fragment() {
         _binding = null
     }
 
-    private inner class AchievementViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    private inner class AchievementViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        //private lateinit var log: UserLog
-        //private val dateFormat: SimpleDateFormat = SimpleDateFormat("dd.MM.yyyy")
-        //private val timeFormat: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
-        //private val textView: TextView = itemView.findViewById(R.id.log_text_view)
-        private val num: TextView = itemView.findViewById(R.id.title)
+        private lateinit var achievement: Achievement
+        private val titleText: TextView = itemView.findViewById(R.id.title)
+        private val descriptionText: TextView = itemView.findViewById(R.id.description)
 
-        init {
-            //textView.setOnClickListener(this)
-        }
 
-        fun bind(string: String) {
-            //this.log = log
-            //val date = log.datetime?.toDate()
-            //textView.text = getString(R.string.log_string,
-            //    log.userName,
-            //    log.action.toString(),
-            //    log.objectType.toString(),
-            //    log.objectName,
-            //    dateFormat.format(date),
-            //    timeFormat.format(date)
-            //)
-            //textView.startAnimation(AnimationUtils.loadAnimation(itemView.context, R.anim.recyclerview_item_anim))
-            num.text = string
-        }
-
-        override fun onClick(v: View) {
-
+        fun bind(achievement: Achievement) {
+            this.achievement = achievement
+            titleText.text = achievement.toString()
+            descriptionText.text = getString(R.string.achievement_description_string, achievement.skill.toString(), achievement.skillLevel)
         }
     }
 
-    private inner class AchievementRecyclerViewAdapter() : RecyclerView.Adapter<AchievementViewHolder>() {
+    private inner class AchievementRecyclerViewAdapter(private var achievements: List<Achievement>) : RecyclerView.Adapter<AchievementViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AchievementViewHolder {
             val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_achievement, parent, false)
@@ -317,15 +307,16 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: AchievementViewHolder, position: Int) {
-            //val log = logViewModel.logResult.value?.success?.get(position)
-            //if (log != null) {
-            //    holder.bind(log)
-            //}
-            holder.bind(position.toString())
+            val achievement = achievements[position]
+            holder.bind(achievement)
         }
 
         override fun getItemCount(): Int {
-            return 10//logViewModel.logResult.value?.success?.size ?: 0
+            return achievements.size
+        }
+
+        fun updateAchievements(achievements: List<Achievement>) {
+            this.achievements = achievements
         }
     }
 
@@ -346,7 +337,6 @@ class UserProfileFragment : Fragment() {
             } else {
                 userSkill.nameEN
             }
-            progressBar.max = userSkill.needExperience
             val per: Double = ((userSkill.experience.toDouble() / userSkill.needExperience.toDouble()) * 100)
             progressBar.progress = per.toInt()
             skillLevelTextView.text = getString(R.string.level_string, userSkill.level)

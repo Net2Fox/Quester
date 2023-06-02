@@ -26,6 +26,7 @@ class Quester : Application() {
 
         kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
             DatabaseRepository.get().getLastId()
+            DatabaseRepository.get().getAchievements()
         }
     }
 

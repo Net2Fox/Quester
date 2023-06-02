@@ -3,6 +3,7 @@ package ru.net2fox.quester.data.model
 import java.util.Locale
 
 data class Skill(
+    var id: String,
     var nameRU: String,
     var nameEN: String
 ) {

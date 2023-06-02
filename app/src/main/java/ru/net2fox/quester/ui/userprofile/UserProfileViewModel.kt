@@ -3,12 +3,15 @@ package ru.net2fox.quester.ui.userprofile
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.tasks.await
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.Result
 import ru.net2fox.quester.data.database.DatabaseRepository
 import ru.net2fox.quester.data.database.ModeratorRepository
+import ru.net2fox.quester.data.model.Achievement
 import ru.net2fox.quester.data.model.Skill
 import ru.net2fox.quester.data.model.UserSkill
 import ru.net2fox.quester.data.model.User
@@ -32,6 +35,9 @@ class UserProfileViewModel : ViewModel() {
     private val _blockUserResult = MutableLiveData<Boolean>()
     val blockUserResult: LiveData<Boolean> = _blockUserResult
 
+    private val _userAchievementResult = MutableLiveData<UserAchievementResult>()
+    val userAchievementResult: LiveData<UserAchievementResult> = _userAchievementResult
+
     suspend fun getUser(userId: String? = null) {
         val result = if(userId == null) {
             databaseRepository.getUser()
@@ -41,13 +47,30 @@ class UserProfileViewModel : ViewModel() {
 
         if (result is Result.Success) {
             val document: DocumentSnapshot = result.data;
+            val achievements: MutableList<Achievement> = mutableListOf()
+            val achievementsRefs = document.get("achievementsRefs") as List<DocumentReference>
+            for (ref in achievementsRefs) {
+                val achiev = ref.get().await()
+                val skill = achiev.getDocumentReference("skillRef")!!.get().await()
+                achievements.add(Achievement(
+                    nameRU = achiev.getString("nameRU")!!,
+                    nameEN = achiev.getString("nameEN")!!,
+                    skillLevel = achiev.getLong("skillLevel")!!,
+                    skill = Skill(
+                        skill.id,
+                        skill.getString("nameRU")!!,
+                        skill.getString("nameEN")!!
+                    )
+                ))
+            }
             _userProfileResult.postValue(
                 UserProfileResult(success = User(
-                document.getString("name")!!,
-                document.get("experience", Int::class.java)!!,
-                document.get("level", Int::class.java)!!
-            )
-            )
+                    document.getString("name")!!,
+                    document.get("experience", Int::class.java)!!,
+                    document.get("level", Int::class.java)!!,
+                    achievements = achievements
+                )
+                )
             )
         } else {
             _userProfileResult.postValue(UserProfileResult(error = R.string.get_data_error))
@@ -87,6 +110,10 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
+    suspend fun getAchievements() {
+
+    }
+
     suspend fun addSkill(skill: Skill) {
         val result = databaseRepository.addSkill(skill)
 
@@ -106,6 +133,7 @@ class UserProfileViewModel : ViewModel() {
             for (postDocument in query) {
                 mutableSkills.add(
                     Skill(
+                        postDocument.id,
                         postDocument.getString("nameRU")!!,
                         postDocument.getString("nameEN")!!
                     )
