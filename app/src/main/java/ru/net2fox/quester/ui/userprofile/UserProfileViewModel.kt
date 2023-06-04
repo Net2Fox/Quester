@@ -1,5 +1,6 @@
 package ru.net2fox.quester.ui.userprofile
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -63,12 +64,31 @@ class UserProfileViewModel : ViewModel() {
                     )
                 ))
             }
+            val skills: MutableList<UserSkill> = mutableListOf()
+            val skillsRef = document.reference.collection("skills")
+                .whereEqualTo("isDeleted", false)
+                .orderBy("id").get().await()
+            for (skill in skillsRef) {
+                skills.add(
+                    UserSkill(
+                        skill.id,
+                        skill.get("id", Long::class.java)!!,
+                        skill.getString("nameRU")!!,
+                        skill.getString("nameEN")!!,
+                        skill.get("experience", Int::class.java)!!,
+                        skill.get("needExperience", Int::class.java)!!,
+                        skill.get("level", Int::class.java)!!
+                )
+                )
+            }
             _userProfileResult.postValue(
                 UserProfileResult(success = User(
+                    document.id,
                     document.getString("name")!!,
                     document.get("experience", Int::class.java)!!,
                     document.get("level", Int::class.java)!!,
-                    achievements = achievements
+                    achievements = achievements,
+                    userSkills = skills
                 )
                 )
             )
@@ -108,10 +128,6 @@ class UserProfileViewModel : ViewModel() {
         } else {
             _userSkillResult.postValue(UserSkillResult(error = R.string.get_data_error))
         }
-    }
-
-    suspend fun getAchievements() {
-
     }
 
     suspend fun addSkill(skill: Skill) {

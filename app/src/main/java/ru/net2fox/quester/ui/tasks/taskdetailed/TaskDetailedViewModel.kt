@@ -67,8 +67,8 @@ class TaskDetailedViewModel : ViewModel() {
         }
     }
 
-    suspend fun saveTask(task: Task) {
-        if (task.listUserSkills != null) {
+    suspend fun saveTask(task: Task, haveChanges: Boolean) {
+        if (haveChanges && task.listUserSkills != null) {
             if (task.skills == null) {
                 task.skills = mutableListOf()
             }

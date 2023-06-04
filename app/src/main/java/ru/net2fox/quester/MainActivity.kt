@@ -5,6 +5,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -26,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.data.auth.AuthRepository
 import ru.net2fox.quester.databinding.ActivityMainBinding
+import ru.net2fox.quester.ui.achievement.AchievementsFragmentDirections
 import ru.net2fox.quester.ui.character.CharacterFragmentDirections
 import ru.net2fox.quester.ui.leaderboard.LeaderboardFragmentDirections
 import ru.net2fox.quester.ui.list.ListFragmentDirections
@@ -73,10 +75,14 @@ class MainActivity : AppCompatActivity() {
             R.id.settingsFragment,
             R.id.skillFragment,
             R.id.logFragment,
-            R.id.placeholderFragment
+            R.id.placeholderFragment,
+            R.id.achievementsFragment
         )
         navController.addOnDestinationChangedListener {_, destination, _ ->
             if (destination.id in hideBottomNavDestinations) {
+                binding.bottomNavigation.visibility = View.GONE
+                window.navigationBarColor = defaultNavBarColor!!
+            } else if (binding.noInternetGroup.visibility == View.VISIBLE) {
                 binding.bottomNavigation.visibility = View.GONE
                 window.navigationBarColor = defaultNavBarColor!!
             } else {
@@ -113,6 +119,9 @@ class MainActivity : AppCompatActivity() {
                             }
                             R.id.userProfileFragment -> {
                                 navController.navigate(UserProfileFragmentDirections.actionUserProfileFragmentToSettingsFragment())
+                            }
+                            R.id.achievementsFragment -> {
+                                navController.navigate(AchievementsFragmentDirections.actionAchievementsFragmentToSettingsFragment())
                             }
                         }
                         true

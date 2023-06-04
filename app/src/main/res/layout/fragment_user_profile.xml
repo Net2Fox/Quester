@@ -101,23 +101,17 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <com.google.android.material.card.MaterialCardView
+                <include android:id="@+id/no_achievements_layout"
+                    layout="@layout/content_no_achievements"
+                    android:visibility="gone"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_achievements"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:checkable="false"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:layout_marginTop="4dp">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view_achievements"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:listitem="@layout/item_achievement"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        android:orientation="horizontal"/>
-
-                </com.google.android.material.card.MaterialCardView>
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/item_achievement"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="horizontal"/>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -143,6 +137,10 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <include android:id="@+id/no_skills_layout"
+                    layout="@layout/content_no_skills"
+                    android:visibility="gone"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_skills"

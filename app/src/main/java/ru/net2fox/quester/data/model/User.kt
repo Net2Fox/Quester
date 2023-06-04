@@ -4,6 +4,8 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
 
 data class User(
+    @get:Exclude
+    var id: String? = null,
     var name: String,
     var experience: Int,
     var level: Int,

@@ -19,4 +19,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/info_settings">
+
+        <Preference
+            app:key="email"
+            app:title="@string/email_title_settings"
+            app:summary="@string/email_message_summary"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

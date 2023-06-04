@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -46,7 +47,7 @@ class UserProfileFragment : Fragment() {
     private lateinit var achievementAdapter: AchievementRecyclerViewAdapter
     private lateinit var userProfileViewModel: UserProfileViewModel
     private lateinit var currentUser: User
-    private lateinit var userSkills: List<UserSkill>
+    private var userSkills: List<UserSkill> = listOf()
     private var achievements: List<Achievement> = listOf()
     private lateinit var skills: List<Skill>
     private lateinit var skillAdapter: SkillRecyclerViewAdapter
@@ -71,7 +72,7 @@ class UserProfileFragment : Fragment() {
         binding.recyclerViewAchievements.adapter = achievementAdapter
 
         binding.recyclerViewSkills.layoutManager = LinearLayoutManager(context)
-        skillAdapter = SkillRecyclerViewAdapter(userProfileViewModel)
+        skillAdapter = SkillRecyclerViewAdapter(userSkills)
         binding.recyclerViewSkills.adapter = skillAdapter
 
         userProfileViewModel.userProfileResult.observe(
@@ -87,8 +88,11 @@ class UserProfileFragment : Fragment() {
                             this.achievements = it.achievements!!
                             achievementAdapter.updateAchievements(achievements)
                         }
+                        if (it.userSkills != null) {
+                            this.userSkills = it.userSkills!!
+                            skillAdapter.updateSkills(userSkills)
+                        }
                         updateUI()
-                        updateCharacterUI()
                     }
                 }
             }
@@ -103,6 +107,7 @@ class UserProfileFragment : Fragment() {
                     }
                     skillResult.success?.let {
                         this.userSkills = it
+                        skillAdapter.updateSkills(it)
                         updateUI()
                     }
                 }
@@ -148,10 +153,13 @@ class UserProfileFragment : Fragment() {
             }
         )
 
+        binding.allAchievementsButton.setOnClickListener {
+            val action = UserProfileFragmentDirections.actionUserProfileFragmentToAchievementsFragment()
+            findNavController().navigate(action)
+        }
+
         binding.swipeRefresh.setOnRefreshListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                updateData()
-            }
+            updateData()
         }
 
         updateData()
@@ -169,17 +177,17 @@ class UserProfileFragment : Fragment() {
 
             lifecycleScope.launch(Dispatchers.IO) {
                 binding.swipeRefresh.isRefreshing = true
-                userProfileViewModel.getUserSkills()
                 userProfileViewModel.getUser()
                 userProfileViewModel.getSkills()
             }
         } else {
             binding.addSkill.visibility = View.GONE
+            binding.noAchievementsLayout.noAchievementsText.visibility = View.GONE
+            binding.noSkillsLayout.noSkillsText.visibility = View.GONE
             requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation).visibility = View.GONE
             (requireActivity() as MainActivity).setDefaultNavBarColor()
             lifecycleScope.launch(Dispatchers.IO) {
                 binding.swipeRefresh.isRefreshing = true
-                userProfileViewModel.getUserSkills(args.userId)
                 userProfileViewModel.getUser(args.userId)
             }
         }
@@ -190,10 +198,7 @@ class UserProfileFragment : Fragment() {
         binding.recyclerViewAchievements.adapter!!.notifyDataSetChanged()
         binding.recyclerViewSkills.adapter!!.notifyDataSetChanged()
         binding.recyclerViewAchievements.adapter!!.notifyDataSetChanged()
-        binding.swipeRefresh.isRefreshing = false
-    }
 
-    private fun updateCharacterUI() {
         if (::currentUser.isInitialized) {
             binding.textViewUserName.text = currentUser.name
             val per: Double = ((currentUser.experience.toDouble() / 1000) * 100)
@@ -201,6 +206,24 @@ class UserProfileFragment : Fragment() {
             binding.textViewUserLevel.text = getString(R.string.level_string, currentUser.level)
             binding.textViewUserPercent.text = getString(R.string.percent_string, per.toInt())
         }
+
+        if (achievements.isEmpty()) {
+            //binding.noAchievementsGroup.visibility = View.VISIBLE
+            binding.noAchievementsLayout.root.visibility = View.VISIBLE
+        } else {
+            //binding.noAchievementsGroup.visibility = View.GONE
+            binding.noAchievementsLayout.root.visibility = View.GONE
+        }
+
+        if (userSkills.isEmpty()) {
+            //binding.noSkillsGroup.visibility = View.VISIBLE
+            binding.noSkillsLayout.root.visibility = View.VISIBLE
+        } else {
+            //binding.noSkillsGroup.visibility = View.GONE
+            binding.noSkillsLayout.root.visibility = View.GONE
+        }
+
+        binding.swipeRefresh.isRefreshing = false
     }
 
     private fun blockConfirmMaterialAlertDialog() {
@@ -344,7 +367,7 @@ class UserProfileFragment : Fragment() {
         }
     }
 
-    private inner class SkillRecyclerViewAdapter(private val userProfileViewModel: UserProfileViewModel) : RecyclerView.Adapter<SkillViewHolder>() {
+    private inner class SkillRecyclerViewAdapter(private var skills: List<UserSkill>) : RecyclerView.Adapter<SkillViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SkillViewHolder {
             val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_skill, parent, false)
@@ -352,14 +375,16 @@ class UserProfileFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: SkillViewHolder, position: Int) {
-            val skill = userProfileViewModel.userSkillResult.value?.success?.get(position)
-            if (skill != null) {
-                holder.bind(skill)
-            }
+            val skill = skills[position]
+            holder.bind(skill)
         }
 
         override fun getItemCount(): Int {
-            return userProfileViewModel.userSkillResult.value?.success?.size ?: 0
+            return skills.size
+        }
+
+        fun updateSkills(skills: List<UserSkill>) {
+            this.skills = skills
         }
     }
 }

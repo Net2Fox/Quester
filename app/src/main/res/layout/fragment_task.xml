@@ -6,6 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.tasks.task.TaskFragment">
 
+        <include android:id="@+id/no_task_layout"
+            layout="@layout/content_no_task"
+            android:visibility="gone"/>
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"

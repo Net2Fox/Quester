@@ -17,6 +17,10 @@
             app:tabInlineLabel="true"
             app:tabMode="scrollable"/>
 
+        <include android:id="@+id/no_list_layout"
+            layout="@layout/content_no_list"
+            android:visibility="gone"/>
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="0dp"
@@ -36,5 +40,19 @@
             android:src="@android:drawable/ic_input_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="visible"
+            app:hideAnimationBehavior="outward"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:showAnimationBehavior="inward"
+            app:trackCornerRadius="4dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

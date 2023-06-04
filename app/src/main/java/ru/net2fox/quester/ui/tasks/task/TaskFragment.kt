@@ -10,12 +10,14 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
@@ -85,6 +87,13 @@ class TaskFragment : Fragment() {
         if (binding.swipeRefresh.isRefreshing) {
             binding.swipeRefresh.isRefreshing = false
         }
+
+        if (tasks.isEmpty()) {
+            binding.noTaskLayout.root.visibility = View.VISIBLE
+        } else {
+            binding.noTaskLayout.root.visibility = View.GONE
+        }
+
     }
 
     fun updateData() {
@@ -119,15 +128,37 @@ class TaskFragment : Fragment() {
             this.task = task
             textView.text = task.name
             checkBoxView.isChecked = task.isExecuted
+            if (checkBoxView.isChecked) {
+                checkBoxView.isEnabled = false
+            }
         }
 
         override fun onClick(v: View) {
             if (v is CheckBox) {
-                task.isExecuted = checkBoxView.isChecked
-                lifecycleScope.launch(Dispatchers.IO) {
-                    taskViewModel.saveTask(task, task.isExecuted)
+                if (checkBoxView.isChecked && !task.isExecuted) {
+                    val builder = MaterialAlertDialogBuilder(requireContext())
+                    builder.setTitle(R.string.mark_task_complete_dialog_title)
+                    builder.setMessage(R.string.mark_task_complete_dialog_message)
+                    builder.setPositiveButton(R.string.yes_dialog_button, null)
+                    builder.setNegativeButton(R.string.no_dialog_button, null)
+                    builder.setOnCancelListener {
+                        checkBoxView.isChecked = false
+                    }
+                    val alertDialog: AlertDialog = builder.create()
+                    alertDialog.show()
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        alertDialog.dismiss()
+                        task.isExecuted = true
+                        checkBoxView.isEnabled = false
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            taskViewModel.saveTask(task, task.isExecuted)
+                        }
+                    }
+                    alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                        alertDialog.dismiss()
+                        checkBoxView.isChecked = false
+                    }
                 }
-
             }
             else if (v is TextView) {
                 val action = ListFragmentDirections.actionListFragmentToTaskDetailedFragment(task.strId!!, arguments?.getString(
@@ -135,7 +166,6 @@ class TaskFragment : Fragment() {
                 )!!)
                 findNavController().navigate(action)
             }
-
         }
     }
 

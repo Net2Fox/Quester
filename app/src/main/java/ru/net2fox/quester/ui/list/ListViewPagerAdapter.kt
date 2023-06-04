@@ -5,20 +5,18 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
+import ru.net2fox.quester.data.model.TaskList
 import ru.net2fox.quester.ui.tasks.task.TaskFragment
 
-class ListViewPagerAdapter(private val fm: FragmentManager, lifecycle: Lifecycle, private val listViewModel: ListViewModel) : FragmentStateAdapter(fm, lifecycle) {
-
-    private val fragmentList = mutableMapOf<String, TaskFragment>()
+class ListViewPagerAdapter(private val fm: FragmentManager, lifecycle: Lifecycle, private val lists: List<TaskList>) : FragmentStateAdapter(fm, lifecycle) {
 
     override fun createFragment(position: Int): TaskFragment {
-        val listId = listViewModel.getListById(position)?.strId!!
-        val fragment = TaskFragment.newInstance(listId)
-        fragmentList[listId] = fragment
-        return fragment
+        //val listId = listViewModel.getListById(position)?.strId!!
+        return TaskFragment.newInstance(lists[position].strId!!)
     }
 
-    override fun getItemCount(): Int = listViewModel.listSize ?: 0
+    override fun getItemCount(): Int = lists.size
+
 
     override fun onBindViewHolder(
         holder: FragmentViewHolder,

@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textfield.TextInputEditText
@@ -60,7 +61,7 @@ class ListFragment : Fragment() {
                 val wantToCloseDialog: Boolean = taskNameEditText?.text.toString().trim().isEmpty()
                 if (!wantToCloseDialog) {
                     alertDialog.dismiss()
-                    val listId = listViewModel.getListId(binding.tabs.selectedTabPosition)
+                    val listId = listViewModel.getListStrId(binding.tabs.selectedTabPosition)
                     lifecycleScope.launch(Dispatchers.IO) {
                         listViewModel.createTask(listId!!, taskNameEditText?.text.toString())
                     }
@@ -76,7 +77,7 @@ class ListFragment : Fragment() {
         tabSelectedIndicator = binding.tabs.tabSelectedIndicator
         tabTextColors = binding.tabs.tabTextColors
 
-        listViewModel = ViewModelProvider(  this, ListViewModelFactory())[ListViewModel::class.java]
+        listViewModel = ViewModelProvider(this, ListViewModelFactory())[ListViewModel::class.java]
 
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(object : MenuProvider {
@@ -107,12 +108,13 @@ class ListFragment : Fragment() {
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
-        adapter = ListViewPagerAdapter(childFragmentManager, lifecycle, listViewModel)
+        adapter = ListViewPagerAdapter(childFragmentManager, lifecycle, listOf())
         binding.viewPager.adapter = adapter
 
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
             tab.text = listViewModel.getListById(position)?.name
         }.attach()
+
         binding.tabs.selectTab(binding.tabs.getTabAt(savedInstanceState?.getInt(KEY_SELECTED_TAB_INDEX) ?: 0))
         binding.tabs.addTab(binding.tabs.newTab().setText(R.string.create_list_tab))
 
@@ -122,6 +124,11 @@ class ListFragment : Fragment() {
                 showToastFail(it)
             }
             listResult.success?.let {
+                adapter = ListViewPagerAdapter(childFragmentManager, lifecycle, it)
+                binding.viewPager.adapter = adapter
+                TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
+                    tab.text = listViewModel.getListById(position)?.name
+                }.attach()
                 updateUI()
             }
         })
@@ -151,6 +158,7 @@ class ListFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             listViewModel.getListsOfTasks()
         }
+        binding.loading.visibility = View.VISIBLE
 
     }
 
@@ -165,12 +173,15 @@ class ListFragment : Fragment() {
             binding.tabs.setSelectedTabIndicator(null)
             context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorOnSurfaceVariant, typedValueTextColor, true)
             binding.tabs.setTabTextColors(typedValueTextColor.data, typedValueTextColor.data)
+            binding.noListLayout.root.visibility = View.VISIBLE
         }
         else if(listViewModel.listSize != 0) {
             binding.fab.visibility = View.VISIBLE
             binding.tabs.setSelectedTabIndicator(tabSelectedIndicator)
             binding.tabs.tabTextColors = tabTextColors
+            binding.noListLayout.root.visibility = View.GONE
         }
+        binding.loading.visibility = View.GONE
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -217,7 +228,7 @@ class ListFragment : Fragment() {
     }
 
     private fun changeListNameMaterialAlertDialog() {
-        val listId = listViewModel.getListId(binding.tabs.selectedTabPosition)
+        val listId = listViewModel.getListStrId(binding.tabs.selectedTabPosition)
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(R.string.edit_list_dialog_title)
         val dialogView: View = layoutInflater.inflate(R.layout.create_alertdialog, null, false)
@@ -249,9 +260,9 @@ class ListFragment : Fragment() {
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             alertDialog.dismiss()
-            val listId = listViewModel.getListId(binding.tabs.selectedTabPosition)
+            val listStrId = listViewModel.getListStrId(binding.tabs.selectedTabPosition)
             lifecycleScope.launch(Dispatchers.IO) {
-                listViewModel.deleteListOfTasks(listId!!)
+                listViewModel.deleteListOfTasks(listStrId!!)
             }
         }
     }

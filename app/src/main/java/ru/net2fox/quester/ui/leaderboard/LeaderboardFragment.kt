@@ -2,6 +2,7 @@ package ru.net2fox.quester.ui.leaderboard
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
 import ru.net2fox.quester.data.model.User
 import ru.net2fox.quester.databinding.FragmentLeaderboardBinding
+import ru.net2fox.quester.ui.moderator.log.LogFragmentDirections
 
 class LeaderboardFragment : Fragment() {
 
@@ -91,7 +94,7 @@ class LeaderboardFragment : Fragment() {
         _binding = null
     }
 
-    private inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         private lateinit var user: User
 
@@ -100,14 +103,22 @@ class LeaderboardFragment : Fragment() {
         private val userLevelTextView: TextView = itemView.findViewById(R.id.text_view_skill_level)
         private val userPercentTextView: TextView = itemView.findViewById(R.id.text_view_skill_percent)
 
+        init {
+            itemView.setOnClickListener(this)
+        }
+
         fun bind(user: User, position: Int) {
             this.user = user
             userNameTextView.text = getString(R.string.leaderboard_string, position + 1, user.name)
             val per: Double = (user.experience.toDouble() / 1000) * 100
-            progressBar.max = 1000
             progressBar.progress = per.toInt()
             userLevelTextView.text = getString(R.string.level_string, user.level)
             userPercentTextView.text = getString(R.string.percent_string, per.toInt())
+        }
+
+        override fun onClick(v: View) {
+            val action = LeaderboardFragmentDirections.actionLeaderboardFragmentToUserProfileFragment(user.id, false)
+            findNavController().navigate(action)
         }
     }
 

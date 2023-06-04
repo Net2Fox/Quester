@@ -103,5 +103,20 @@
     <string name="sign_in_failed_account_blocked">Ваш аккаунт был заблокирован</string>
     <string name="blocked_user_dialog_text">Ваш аккаунт был заблокирован</string>
     <string name="blocked_title">Блокировка</string>
-    <string name="achievement_description_string">Прокачайте навык \"%1$s\" до %2$d уровня</string>
+    <string name="achievement_description_string">"Прокачайте навык \"%1$s\" до %2$d уровня "</string>
+    <string name="no_achievements_header">Достижения отсутствуют</string>
+    <string name="no_achievements_text">Чтобы получать достижения повышайте уровень навыков</string>
+    <string name="no_skills_header">Навыки отсутствуют</string>
+    <string name="no_skills_text">Добавьте навыки, нажав на иконку +</string>
+    <string name="no_list_header">У вас ещё нет списков задач</string>
+    <string name="no_list_text">Вы можете добавить список, нажав на кнопку \"+ Создать список\"</string>
+    <string name="no_task_text">Вы можете добавить задачу, нажав на кнопку \"+\"</string>
+    <string name="no_task_header">В данном списке ещё нет задач</string>
+    <string name="email_title_settings">Связаться с нами</string>
+    <string name="email_message_summary">Отправьте нам письмо на электронную почту чтобы сообщить о проблеме или предложить идею</string>
+    <string name="info_settings">Информация</string>
+    <string name="send_email_intent">Отправить письмо</string>
+    <string name="mark_task_complete_dialog_title">Вы точно хотите отметить задачу выполненной?</string>
+    <string name="mark_task_complete_dialog_message">Это действие нельзя отменить!</string>
+    <string name="achievements_label">Достижения</string>
 </resources>

@@ -41,10 +41,9 @@ class AuthRepository {
     suspend fun signIn(email: String, password: String): Result<AuthResult> {
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            if (db.collection("users").document(authResult.user!!.uid).get().await().getBoolean("isDeleted") == true) {
+            if (isDeleted()) {
                 firebaseAuth.signOut()
                 throw FirebaseDeletedAccountException("Your account has been deleted")
-
             }
             if (isBlocked()) {
                 firebaseAuth.signOut()
@@ -53,19 +52,34 @@ class AuthRepository {
             databaseRepository.initializeUser()
             Result.Success(authResult)
         } catch (e: Exception) {
-            Log.d("FirebaseAuth", e.message.toString())
+            Log.d("FirebaseAuth", e.toString())
             Result.Error(e)
         }
     }
 
     suspend fun isModerator(): Boolean {
-        val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
-        return result.getBoolean("isModerator")!!
+        return try {
+            val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
+            result.getBoolean("isModerator")!!
+        } catch (_: Exception) {
+            false
+        }
+
     }
 
     suspend fun isBlocked(): Boolean {
+        return try {
+            val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
+            result.getBoolean("isBlocked")!!
+        } catch (_: Exception) {
+            false
+        }
+
+    }
+
+    private suspend fun isDeleted(): Boolean {
         val result = db.collection("users").document(firebaseAuth.currentUser!!.uid).get().await()
-        return result.getBoolean("isBlocked")!!
+        return result.getBoolean("isDeleted")!!
     }
 
     fun signOut() {

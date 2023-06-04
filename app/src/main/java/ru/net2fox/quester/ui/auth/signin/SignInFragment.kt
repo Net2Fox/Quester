@@ -51,6 +51,7 @@ class SignInFragment : Fragment() {
         val signUpButton = binding.signUp
         val loadingProgressBar = binding.loading
 
+
         signInViewModel.signInFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
                 loginFormState ?: return@Observer

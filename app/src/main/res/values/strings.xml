@@ -121,5 +121,19 @@
     <string name="blocked_user_dialog_text">Your account has been blocked</string>
     <string name="blocked_title">Blocking</string>
     <string name="achievement_description_string">Upgrade the \"%1$s\" skill to level %2$d</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="no_achievements_header">No achievements yet</string>
+    <string name="no_achievements_text">Increase your skill level to gain achievements</string>
+    <string name="no_skills_header">No skills yet</string>
+    <string name="no_skills_text">Add skills by clicking on the + icon</string>
+    <string name="no_list_header">You don\'t have task lists yet</string>
+    <string name="no_list_text">You can add a list by clicking the \"+ Create list\" button</string>
+    <string name="no_task_text">You can add a task by clicking on the \"+\" button</string>
+    <string name="no_task_header">There are no tasks on this list yet</string>
+    <string name="email_title_settings">Contact Us</string>
+    <string name="email_message_summary">Send us an email to report a problem or suggest an idea for improvement</string>
+    <string name="info_settings">Information</string>
+    <string name="send_email_intent">Send an email</string>
+    <string name="mark_task_complete_dialog_title">Are you sure you want to mark the task done?</string>
+    <string name="mark_task_complete_dialog_message">This action cannot be undone!</string>
+    <string name="achievements_label">Achievements</string>
 </resources>

@@ -41,6 +41,7 @@ class TaskDetailedFragment : Fragment() {
     private val args: TaskDetailedFragmentArgs by navArgs()
     private lateinit var taskDetailedViewModel: TaskDetailedViewModel
     private lateinit var adapterRecyclerView: SkillRecyclerViewAdapter
+    private var haveChanges = false
 
     // Это свойство действует только между onCreateView и
     // onDestroyView.
@@ -77,7 +78,7 @@ class TaskDetailedFragment : Fragment() {
                         currnetTask.name = binding.editTextName.text.toString()
                         currnetTask.description = binding.editTextDescription.text.toString()
                         lifecycleScope.launch(Dispatchers.IO) {
-                            taskDetailedViewModel.saveTask(currnetTask)
+                            taskDetailedViewModel.saveTask(currnetTask, haveChanges)
                         }
                         true
                     }
@@ -87,14 +88,14 @@ class TaskDetailedFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         binding.addSkillButton.setOnClickListener {
-            createSkillMaterialAlertDialog()
+            addSkillMaterialAlertDialog()
         }
 
         taskDetailedViewModel.taskDetailedResult.observe(
             viewLifecycleOwner,
             Observer { task ->
                 task.error?.let {
-                    showToastFail(it)
+                    showToast(it)
                 }
                 task.success?.let {
                     currnetTask = it
@@ -107,7 +108,7 @@ class TaskDetailedFragment : Fragment() {
             viewLifecycleOwner,
             Observer { action ->
                 action.error?.let {
-                    showToastFail(it)
+                    showToast(it)
                 }
                 action.success?.let {
                     findNavController().popBackStack()
@@ -137,9 +138,19 @@ class TaskDetailedFragment : Fragment() {
         binding.autoComplete.setAdapter(difficultyArrayAdapter)
 
         binding.extendedFab.setOnClickListener {
-            currnetTask.isExecuted = !currnetTask.isExecuted
-            lifecycleScope.launch(Dispatchers.IO) {
-                taskDetailedViewModel.taskMarkChange(currnetTask, !currnetTask.isExecuted, true)
+            val builder = MaterialAlertDialogBuilder(requireContext())
+            builder.setTitle(R.string.mark_task_complete_dialog_title)
+            builder.setMessage(R.string.mark_task_complete_dialog_message)
+            builder.setPositiveButton(R.string.yes_dialog_button, null)
+            builder.setNegativeButton(R.string.no_dialog_button, null)
+            val alertDialog: AlertDialog = builder.create()
+            alertDialog.show()
+            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                alertDialog.dismiss()
+                currnetTask.isExecuted = true
+                lifecycleScope.launch(Dispatchers.IO) {
+                    taskDetailedViewModel.taskMarkChange(currnetTask, !currnetTask.isExecuted, true)
+                }
             }
         }
 
@@ -160,7 +171,7 @@ class TaskDetailedFragment : Fragment() {
         if (task.isExecuted) {
             binding.extendedFab.visibility = View.GONE
         } else {
-            binding.extendedFab.text = getString(R.string.task_complete)
+            binding.extendedFab.visibility = View.VISIBLE
         }
     }
 
@@ -169,16 +180,17 @@ class TaskDetailedFragment : Fragment() {
             currnetTask.skills = mutableListOf()
         }
         currnetTask.listUserSkills?.add(userSkill)
+        haveChanges = true
     }
 
-    private fun showToastFail(@StringRes errorString: Int) {
+    private fun showToast(@StringRes string: Int) {
         val appContext = context?.applicationContext ?: return
-        Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+        Toast.makeText(appContext, string, Toast.LENGTH_LONG).show()
     }
 
-    private fun createSkillMaterialAlertDialog() {
+    private fun addSkillMaterialAlertDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
-        builder.setTitle(R.string.create_skill_dialog_title)
+        builder.setTitle(R.string.add_skill_dialog_title)
         val dialogView: View = LayoutInflater.from(this.context).inflate(R.layout.skill_alertdialog, null, false)
         val skillsAdapter = ArrayAdapter(requireContext(), R.layout.item_difficulty, userSkills)
         val autoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.auto_complete)
@@ -197,9 +209,19 @@ class TaskDetailedFragment : Fragment() {
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             if (selectedUserSkill != null) {
-                alertDialog.dismiss()
-                addTaskSkill(selectedUserSkill!!)
-                updateUI(currnetTask)
+                var userAlreadyHaveSkill = false
+                for (taskSkill in currnetTask.listUserSkills!!) {
+                    if (taskSkill.nameEN == selectedUserSkill!!.nameEN) {
+                        showToast(R.string.error_add_skill)
+                        userAlreadyHaveSkill = true
+                        break
+                    }
+                }
+                if (!userAlreadyHaveSkill) {
+                    alertDialog.dismiss()
+                    addTaskSkill(selectedUserSkill!!)
+                    updateUI(currnetTask)
+                }
             }
         }
     }

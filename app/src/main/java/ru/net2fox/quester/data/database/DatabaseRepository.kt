@@ -63,6 +63,7 @@ class DatabaseRepository {
                 .document(user.uid)
                 .get().await()
             val currentUser = User(
+                userSnapshot.id,
                 userSnapshot.getString("name")!!,
                 userSnapshot.get("experience", Int::class.java)!!,
                 userSnapshot.get("level", Int::class.java)!!,
@@ -109,6 +110,7 @@ class DatabaseRepository {
         return try {
             val result = db.collection("users")
                 .whereEqualTo("isDeleted", false)
+                .whereEqualTo("isModerator", false)
                 .orderBy("level", Query.Direction.DESCENDING)
                 .orderBy("experience", Query.Direction.DESCENDING)
                 .orderBy("name", Query.Direction.ASCENDING)
@@ -178,6 +180,22 @@ class DatabaseRepository {
             userRef.set(hashMapOf(
                 "isDeleted" to true
             ), SetOptions.merge()).await()
+            val userLists = db.collection("users").document(user.uid)
+                .collection("lists")
+                .whereEqualTo("isDeleted", false).get().await()
+            for (list in userLists.documents) {
+                list.reference.set(hashMapOf(
+                    "isDeleted" to true
+                ), SetOptions.merge()).await()
+            }
+            val userSkills = db.collection("users").document(user.uid)
+                .collection("skills")
+                .whereEqualTo("isDeleted", false).get().await()
+            for (skill in userSkills.documents) {
+                skill.reference.set(hashMapOf(
+                    "isDeleted" to true
+                ), SetOptions.merge()).await()
+            }
             writeLog(userRef, Action.DELETE, Object.ACCOUNT)
             true
         } catch (e: Exception) {
@@ -331,7 +349,11 @@ class DatabaseRepository {
                         id = taskLastId,
                         name = taskName,
                         difficulty = Difficulty.EASY,
-                        description = "Описание",
+                        description = if (Locale.getDefault().language.equals(Locale("ru").language)) {
+                            "Описание"
+                        } else {
+                            "Description"
+                        },
                         isExecuted = false
                     )
                 )
@@ -406,8 +428,8 @@ class DatabaseRepository {
                             "experience" to (skill.get(
                                 "experience",
                                 Int::class.java
-                            )!! + task.difficulty.addExp) - 100,
-                            "needExperience" to skill.get("needExperience", Int::class.java)!! * 2
+                            )!! + task.difficulty.addExp) - skill.get("needExperience", Int::class.java)!! ,
+                            "needExperience" to skill.get("needExperience", Int::class.java)!! + 100
                         )
                         val skillReference = skill.getDocumentReference("skillRef")
                         val skillLevel: Long = skill.get("level", Long::class.java)!! + 1
@@ -439,7 +461,7 @@ class DatabaseRepository {
                             "experience" to (userDoc.get(
                                 "experience",
                                 Double::class.java
-                            )!! + (task.difficulty.addExp.toDouble() / 2)) - 100
+                            )!! + (task.difficulty.addExp.toDouble() / 2)) - 1000
                         )
                     } else {
                         hashMapOf(
@@ -503,6 +525,20 @@ class DatabaseRepository {
             }
         } catch (_: Exception) {
         }
+    }
+
+    suspend fun getAchievementsList(): Result<QuerySnapshot> {
+        return try {
+            val result = db.collection("achievements")
+                .orderBy("skillLevel")
+                .orderBy("skillRef")
+                .get()
+                .await()
+            Result.Success(result)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+
     }
 
     suspend fun getSkills(): Result<QuerySnapshot> {

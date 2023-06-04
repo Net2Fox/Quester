@@ -1,5 +1,6 @@
 package ru.net2fox.quester.ui.leaderboard
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +17,6 @@ class LeaderboardViewModel : ViewModel() {
     private val _usersResult = MutableLiveData<LeaderboardResult>()
     val usersResult: LiveData<LeaderboardResult> = _usersResult
 
-
     suspend fun getUserLeaderboard() {
         val result = databaseRepository.getUserLeaderboard()
 
@@ -26,6 +26,7 @@ class LeaderboardViewModel : ViewModel() {
             for (postDocument in query) {
                 mutableUsers.add(
                     User(
+                        postDocument.id,
                         postDocument.getString("name")!!,
                         postDocument.get("experience", Int::class.java)!!,
                         postDocument.get("level", Int::class.java)!!

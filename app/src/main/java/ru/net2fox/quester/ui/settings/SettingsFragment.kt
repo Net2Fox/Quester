@@ -1,5 +1,7 @@
 package ru.net2fox.quester.ui.settings
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +17,7 @@ import androidx.preference.PreferenceFragmentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.net2fox.quester.R
+
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -58,6 +61,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val progressResetPreference = findPreference<Preference>("reset")
         val deleteAccountPreference = findPreference<Preference>("delete")
         val signOutPreference = findPreference<Preference>("signout")
+        val emailPreference = findPreference<Preference>("email")
 
         progressResetPreference?.setOnPreferenceClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
@@ -80,7 +84,20 @@ class SettingsFragment : PreferenceFragmentCompat() {
             updateUI()
             true
         }
+
+        emailPreference?.setOnPreferenceClickListener   {
+            sendEmail()
+            true
+        }
     }
+
+    private fun sendEmail() {
+        val i = Intent(Intent.ACTION_SEND)
+        i.type = "message/rfc822"
+        i.putExtra(Intent.EXTRA_EMAIL, arrayOf("trakounet.fox@gmail.com"))
+        startActivity(Intent.createChooser(i, getString(R.string.send_email_intent)))
+    }
+
 
     private fun updateUI(back: Boolean = false) {
         if (back){
